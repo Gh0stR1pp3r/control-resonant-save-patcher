@@ -1,0 +1,12 @@
+*.exe
+*.pdb
+*.tmp
+CosmeticSavePatcher.lock
+CosmeticSaveBackup-*/
+*-header
+*-persi-global
+*-player
+*-bundle-container
+preferences_*
+.env
+.env.*
