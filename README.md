@@ -7,11 +7,22 @@ A Windows utility for restoring the six known preorder cosmetic flags in a suppo
 ## How to use
 
 1. Close the game.
-2. Put `CosmeticSavePatcher.exe` in the folder containing your save files.
+2. Open your [Steam save folder](#steam-save-folder) and put `CosmeticSavePatcher.exe` inside it.
 3. Double-click it. It checks the files, creates a backup, and patches the newest save set.
 4. Read the result, press Enter to close, then load that save with the original game executable.
 
 Only the EXE is needed. No Python, installer, internet connection, or administrator access is required. It uses the .NET Framework included with Windows 10/11.
+
+## Steam save folder
+
+```text
+<Steam-folder>\userdata\<user-id>\3669870\remote\
+```
+
+- [`<Steam-folder>`](https://www.pcgamingwiki.com/wiki/Glossary:Game_data#Steam_client) is the folder where Steam is installed, usually `C:\Program Files (x86)\Steam`.
+- [`<user-id>`](https://www.pcgamingwiki.com/wiki/Glossary:Game_data#User_ID) is your Steam account's numbered folder inside `userdata`.
+
+Open your Steam folder, then `userdata`, your numbered account folder, `3669870`, and finally `remote`. Put `CosmeticSavePatcher.exe` inside that `remote` folder, beside the save files. The angle-bracket names above are placeholders, not text to type literally.
 
 ## Choosing the save
 
@@ -24,7 +35,7 @@ The patcher uses the date inside the save, not its filename number or Windows mo
 -bundle-container
 ```
 
-Keep all four together. Only the newest set beside the EXE is patched, even if several save slots are present. Subfolders are not searched. To patch a particular save, put just its four files and the EXE in a separate folder.
+Keep all four together. Only the newest set beside the EXE is patched, even if several save slots are present. Subfolders are not searched. To patch a particular save, put just its four files and the EXE in a separate folder. After patching that copy, copy all four save files back into your Steam `remote` folder before starting the game.
 
 ## Backups and undo
 

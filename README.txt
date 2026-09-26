@@ -1,7 +1,8 @@
 COSMETIC SAVE PATCHER
 
 1. Close the game.
-2. Put CosmeticSavePatcher.exe in the folder containing your save files.
+2. Open the Steam save folder described below and put
+   CosmeticSavePatcher.exe inside it.
 3. Double-click it. It checks the saves, creates a backup, then patches
    the newest save set. Read the result and press Enter to close.
 4. Start the game with the original executable and load that save.
@@ -9,6 +10,18 @@ COSMETIC SAVE PATCHER
 The EXE is standalone: copy only CosmeticSavePatcher.exe to the save folder.
 No Python, installer, internet connection or administrator access is needed.
 It uses the .NET Framework provided with Windows 10/11.
+
+Steam save folder
+<Steam-folder>\userdata\<user-id>\3669870\remote\
+
+<Steam-folder> means the folder where Steam is installed, usually:
+C:\Program Files (x86)\Steam
+<user-id> means your Steam account's numbered folder inside userdata.
+
+Open your Steam folder, then userdata, your numbered account folder,
+3669870, and finally remote. Put CosmeticSavePatcher.exe inside remote,
+beside the save files. The names in angle brackets are placeholders;
+do not type them literally.
 
 Which files?
 The save names do not need to match the uploaded examples. The four files
@@ -21,7 +34,9 @@ Keep all four together. The program uses the date inside each header,
 not the filename number or Windows modification date. It patches only
 the newest set in the same folder as the EXE, even when multiple save
 slots are present. It does not search subfolders. For a particular save,
-put just its four files and the EXE into a separate folder.
+put just its four files and the EXE into a separate folder. After
+patching that copy, copy all four save files back into your Steam remote
+folder before starting the game.
 
 What does it change?
 It removes entitlement ID 5C2B95A3 from the selected header, restores the
