@@ -48,9 +48,9 @@ global 23, world facts 4, and the known nine-slot outfit container.
 It stops on bad checksums, unsupported layouts, incomplete newest sets,
 or tied newest timestamps. It does not guess new layouts after an update.
 Unknown header files ending in -header also cause it to stop.
-The underlying save recovery was confirmed working by the user; this
-standalone implementation has been compiled but has not been run or
-tested in-game. A later run with the patched game EXE may record the
+Tested and confirmed working on the current game version, as reported
+by the repository owner on September 26, 2026. Future game updates
+may change compatibility. A later run with the patched game EXE may record the
 entitlement again; rerun this tool before returning to the original EXE.
 
 Source and building

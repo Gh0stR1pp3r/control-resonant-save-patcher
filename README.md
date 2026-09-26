@@ -51,7 +51,7 @@ Use `--no-pause` for terminal automation or `--help` for a short summary.
 
 Supports the analyzed save layout: RMDB 2/2, header version 16, global version 23, world facts version 4, and the known nine-slot outfit container. The program stops on invalid checksums, unsupported layouts, incomplete newest sets, ambiguous newest dates, or unrecognized files ending in `-header`.
 
-The underlying save-recovery method was reported working by the user who supplied the before/after saves. **This standalone executable has been compiled, but has not yet been run or tested in-game.** The initial release is therefore marked as a prerelease. Future game updates may change the format or ownership behavior.
+**Tested and confirmed working on the current game version**, as reported by the repository owner on September 26, 2026. Future game updates may change the format or ownership behavior.
 
 Running the game with a modified executable that grants the entitlement again may record it as applied again. Rerun this tool before returning to the original executable in that case.
 
