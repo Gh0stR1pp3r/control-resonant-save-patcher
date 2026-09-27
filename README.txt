@@ -139,7 +139,7 @@ Linux (after chmod +x):
 For terminal automation, add --no-pause. Use --help for a short summary.
 
 Supported saves
-Built for the supplied CONTROLResonant save format: RMDB 2/2, header 16,
+Built for the supplied Control Resonant save format: RMDB 2/2, header 16,
 global 23, world facts 4, and the known nine-slot outfit container.
 It stops on bad checksums, unsupported layouts, incomplete newest sets,
 or tied newest timestamps. It does not guess new layouts after an update.
