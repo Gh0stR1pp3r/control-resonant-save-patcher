@@ -171,3 +171,7 @@ The output is `publish/linux-x64/CosmeticSavePatcher-linux-x64`. The build downl
 [.NET runtime license and third-party notices](DOTNET-NOTICES.txt) are also embedded in the Linux executable.
 
 Use source files from the version you want to build. The original `v1.1.0` tag predates Linux support; its automatic source archive does not contain the Linux project.
+
+## Maintainer and agent documentation
+
+Start with [AGENTS.md](AGENTS.md). Technical references cover the [save format and supported flags](docs/save-format.md), [findings and evidence](docs/findings.md), and [build and release workflow](docs/releasing.md).
