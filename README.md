@@ -6,6 +6,8 @@ A Windows and Linux x64 utility for restoring preorder and promotional items in 
 
 **Version 1.2.0 was tested and confirmed working on Windows with the current game version by the repository owner on September 27, 2026.**
 
+**The Linux version was also tested by the user who opened [issue #2](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/2), who reported that the patcher ran successfully.**
+
 ## Downloads
 
 - **[Windows: CosmeticSavePatcher.exe](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/latest/download/CosmeticSavePatcher.exe)**
