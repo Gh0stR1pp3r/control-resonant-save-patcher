@@ -48,7 +48,7 @@ WINDOWS
    CosmeticSavePatcher.exe inside it.
 3. Double-click it. It checks the saves, creates a backup, then patches
    the newest save set. Read the result and press Enter to close.
-4. Start the game with the original executable and load that save.
+4. Start the game and load that save.
 
 The EXE is standalone: copy only CosmeticSavePatcher.exe to the save folder.
 No Python, installer, internet connection or administrator access is needed.
@@ -148,16 +148,14 @@ The Windows 1.2.0 patcher was tested and confirmed working on the current
 game version by the repository owner on September 27, 2026, including the
 six added promotional cosmetics. The analyzed game executable version is
 0.563.737.9. Item names and entitlement IDs come from the installed databases.
-Future game updates may change compatibility. A later run with a patched
-game EXE may record entitlement entries again; rerun this tool before
-returning to the original EXE.
+Future game updates may change compatibility.
 
 Upgrading from 1.0.0 or 1.1.0
 Replace the old patcher with this version for your OS and run beside saves.
 Previously supported unlocks are retained. If all 14 flags are already
 enabled and the ten associated entitlement entries are absent, the
-program reports Already patched. Load with the original game EXE and
-equip items from the cosmetic menu.
+program reports Already patched. Start the game, load the patched save,
+and equip items from the cosmetic menu.
 
 Source and building
 Source files are available in the repository, and not needed to run it.

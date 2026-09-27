@@ -20,7 +20,7 @@ A Windows and Linux x64 utility for restoring preorder and promotional items in 
 - Removes matching applied-entitlement markers for the added promotions and PC preorder, extending the existing revocation-prevention approach.
 - Adding promotional flags alone leaves your equipped outfit unchanged; equip the items from the cosmetic menu.
 
-To upgrade, replace the patcher with the new build for your operating system and run it beside your saves. No experimental game EXE is needed.
+To upgrade, replace the patcher with the new build for your operating system and run it beside your saves.
 
 ## Included items
 
@@ -50,7 +50,7 @@ Reward sources are mapped from the installed game data. **Corrupted** is the pre
 1. Close the game.
 2. Open your [Steam save folder](#steam-save-folder) and put `CosmeticSavePatcher.exe` inside it.
 3. Double-click it. It checks the files, creates a backup, and patches the newest save set.
-4. Read the result, press Enter to close, then load that save with the original game executable.
+4. Read the result, press Enter to close, then start the game and load that save.
 
 Only the EXE is needed. No Python, installer, internet connection, or administrator access is required. It uses the .NET Framework included with Windows 10/11.
 
@@ -147,8 +147,6 @@ Supports the analyzed save layout: RMDB 2/2, header version 16, global version 2
 The Linux x64 build uses the same patching logic. A Linux user reported that it ran successfully in [issue #2](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/2). The report does not specify a distribution or confirm Steam Deck compatibility or in-game results.
 
 Item names, flag IDs, and the corresponding reward sources were read from the installed game's databases. The full supported item list is shown above.
-
-Running the game with a modified executable that grants the entitlement again may record it as applied again. Rerun this tool before returning to the original executable in that case.
 
 No game files, personal saves, or account credentials are distributed here.
 
