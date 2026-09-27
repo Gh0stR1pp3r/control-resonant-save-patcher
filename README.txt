@@ -19,7 +19,8 @@ It uses the .NET Framework provided with Windows 10/11.
 
 LINUX X64
 1. Close the game completely.
-2. Download CosmeticSavePatcher-linux-x64 and put it beside your save files.
+2. Open the Linux save location below and find the actual save files.
+   Download CosmeticSavePatcher-linux-x64 and put it beside those files.
 3. Open a terminal in that folder and run:
      chmod +x CosmeticSavePatcher-linux-x64
      ./CosmeticSavePatcher-linux-x64
@@ -33,20 +34,29 @@ cache. Saves are read from beside the patcher. Linux/Steam Deck operation
 has not yet been tested.
 
 Steam save folder
+Windows:
 <Steam-folder>\userdata\<user-id>\3669870\remote\
 
-Linux:
-<Steam-folder>/userdata/<user-id>/3669870/remote/
-
-<Steam-folder> means Steam's folder containing userdata. On Windows, usually:
+<Steam-folder> means Steam's folder containing userdata, usually:
 C:\Program Files (x86)\Steam
-On Linux, use your Steam data folder; its location depends on installation.
 <user-id> means your Steam account's numbered folder inside userdata.
 
 Open your Steam folder, then userdata, your numbered account folder,
-3669870, and finally remote. Put the patcher for your OS inside remote,
-beside the save files. The names in angle brackets are placeholders;
-do not type them literally.
+3669870, and finally remote. Put CosmeticSavePatcher.exe inside remote,
+beside the save files.
+
+Linux (Steam/Proton):
+<SteamLibrary-folder>/steamapps/compatdata/3669870/pfx/
+
+<SteamLibrary-folder> means the Steam library where the game is installed.
+Open it, then steamapps, compatdata, 3669870, and pfx.
+The pfx folder is the game's Windows environment under Proton. Save
+folders can be nested inside it. Find the folder containing files ending
+in -header, -persi-global, -player, and -bundle-container. You can search
+within pfx for *-header to find that folder. Put CosmeticSavePatcher-linux-x64
+beside the actual save files. The patcher does not search subfolders.
+
+The names in angle brackets are placeholders; do not type them literally.
 
 Which files?
 The save names do not need to match the uploaded examples. The four files
@@ -60,7 +70,7 @@ not the filename number or filesystem modification date. It patches only
 the newest set in the same folder as the patcher, even when multiple save
 slots are present. It does not search subfolders. For a particular save,
 put just its four files and the patcher into a separate folder. After
-patching that copy, copy all four save files back into your Steam remote
+patching that copy, copy all four save files back into the original save
 folder before starting the game.
 
 What does it change?

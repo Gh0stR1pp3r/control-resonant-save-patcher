@@ -30,7 +30,7 @@ Only the EXE is needed. No Python, installer, internet connection, or administra
 ### Linux x64
 
 1. Close the game completely.
-2. Download `CosmeticSavePatcher-linux-x64` and put it in your Steam save folder, beside the save files.
+2. Open the [Linux save location](#linux-steamproton) below and find the folder containing your save files. Download `CosmeticSavePatcher-linux-x64` and put it beside those files.
 3. Open a terminal **in that folder** and run:
 
 ```sh
@@ -44,20 +44,30 @@ Only this one file is needed. It includes .NET 8.0.31 and uses the same automati
 
 ## Steam save folder
 
+### Windows
+
 ```text
 <Steam-folder>\userdata\<user-id>\3669870\remote\
 ```
 
-On Linux, use the same folder structure with forward slashes:
-
-```text
-<Steam-folder>/userdata/<user-id>/3669870/remote/
-```
-
-- [`<Steam-folder>`](https://www.pcgamingwiki.com/wiki/Glossary:Game_data#Steam_client) is the folder containing Steam's `userdata` directory, usually `C:\Program Files (x86)\Steam` on Windows. On Linux, use your Steam installation's data folder; its location depends on how Steam was installed.
+- [`<Steam-folder>`](https://www.pcgamingwiki.com/wiki/Glossary:Game_data#Steam_client) is the folder containing Steam's `userdata` directory, usually `C:\Program Files (x86)\Steam`.
 - [`<user-id>`](https://www.pcgamingwiki.com/wiki/Glossary:Game_data#User_ID) is your Steam account's numbered folder inside `userdata`.
 
-Open your Steam folder, then `userdata`, your numbered account folder, `3669870`, and finally `remote`. Put the patcher for your operating system inside that `remote` folder, beside the save files. The angle-bracket names above are placeholders, not text to type literally.
+Open your Steam folder, then `userdata`, your numbered account folder, `3669870`, and finally `remote`. Put `CosmeticSavePatcher.exe` inside that `remote` folder, beside the save files.
+
+### Linux (Steam/Proton)
+
+Start here:
+
+```text
+<SteamLibrary-folder>/steamapps/compatdata/3669870/pfx/
+```
+
+[`<SteamLibrary-folder>`](https://www.pcgamingwiki.com/wiki/Glossary:Game_data#Steam_client) is the Steam library where the game is installed. Open it, then `steamapps`, `compatdata`, `3669870`, and `pfx`.
+
+The `pfx` folder is the game's Windows environment under Proton; save folders can be nested inside it. See the [Proton save-folder explanation](https://github.com/ValveSoftware/Proton/wiki/Proton-FAQ#where-are-my-saved-games-located). Find the folder containing files ending in `-header`, `-persi-global`, `-player`, and `-bundle-container` (you can search within `pfx` for `*-header`). Place `CosmeticSavePatcher-linux-x64` **in that folder beside the actual save files**. The patcher only checks its own folder and does not search subfolders.
+
+The angle-bracket names above are placeholders, not text to type literally.
 
 ## Choosing the save
 
@@ -70,7 +80,7 @@ The patcher uses the date inside the save, not its filename number or filesystem
 -bundle-container
 ```
 
-Keep all four together. Only the newest set beside the patcher is patched, even if several save slots are present. Subfolders are not searched. To patch a particular save, put just its four files and the patcher in a separate folder. After patching that copy, copy all four save files back into your Steam `remote` folder before starting the game.
+Keep all four together. Only the newest set beside the patcher is patched, even if several save slots are present. Subfolders are not searched. To patch a particular save, put just its four files and the patcher in a separate folder. After patching that copy, copy all four save files back into the original save folder before starting the game.
 
 ## Backups and undo
 
