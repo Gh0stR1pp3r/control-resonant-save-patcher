@@ -2,21 +2,44 @@
 
 ![Control Resonant](https://exputer.com/wp-content/uploads/2026/08/control-resonant.jpg)
 
-A Windows and Linux x64 utility for restoring preorder cosmetics **plus the additional baseball cap and sunglasses** in supported CONTROLResonant saves. Version **1.1.0** restores eight known cosmetic flags and removes the three associated applied-entitlement entries to avoid the observed revocation with the original game executable.
+A Windows and Linux x64 utility for restoring preorder and promotional items in supported CONTROLResonant saves. Version **1.2.0** restores **13 cosmetics plus the Pickpocket's Tool charm** and removes their associated applied-entitlement entries.
+
+**Version 1.2.0 was tested and confirmed working on Windows with the current game version by the repository owner on September 27, 2026.**
 
 ## Downloads
 
 - **[Windows: CosmeticSavePatcher.exe](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/latest/download/CosmeticSavePatcher.exe)**
 - **[Linux x64: CosmeticSavePatcher-linux-x64](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/latest/download/CosmeticSavePatcher-linux-x64)** — includes .NET; no separate .NET installation or Wine needed. Built successfully, but not yet tested on Linux.
 
-## New in 1.1.0
+## New in 1.2.0
 
-- Adds support for the additional baseball cap and sunglasses, including saves where their unlock flags were never present.
-- Preserves existing preorder unlocks when upgrading from 1.0.0.
-- Makes the new items available without changing your equipped outfit solely because their flags were added. Equip them from the cosmetic menu.
-- Includes a native Linux x64 executable using the same save-patching logic.
+- Adds Optical Filtering Goggles, Communications Department Headset, Sierra Helmet, Sierra Vest, Sierra Suit, and MIO Specialist's Robe.
+- Retains all eight previous item flags, including Exposed and the Pickpocket's Tool charm.
+- Removes matching applied-entitlement markers for the added promotions and PC preorder, extending the existing revocation-prevention approach.
+- Adding promotional flags alone leaves your equipped outfit unchanged; equip the items from the cosmetic menu.
 
-To upgrade, replace the old patcher with the download for your operating system and run it beside your saves. No experimental game EXE is needed.
+To upgrade, replace the patcher with the new build for your operating system and run it beside your saves. No experimental game EXE is needed.
+
+## Included items
+
+| Item | Flag ID | Reward source |
+| --- | --- | --- |
+| Optical Filtering Goggles | `0x2E27C13F1B8BE2AD` | Mailing promotion 2 |
+| Communications Department Headset | `0x46780E853CF1A90B` | Mailing promotion 1 |
+| Sierra Helmet | `0xB961238CCE640F14` | Twitch drop 3 |
+| Sierra Vest | `0xBF6BE35893F7D586` | Twitch drop 2 |
+| Sierra Suit | `0xEF6FBC7BA02AB697` | Twitch drop 1 |
+| MIO Specialist's Robe | `0xF37DC383C5C5E132` | China promotion |
+| Third Ice Baseball Cap | `0x5388457983503C2E` | NVIDIA promotion |
+| Cracked Standard Issue Sunglasses | `0x747AFDEFDBABB85B` | Beta tester reward |
+| Threshold Bureau Coat | `0x2859E4A7F3D0F7FB` | PS5 preorder |
+| Threshold Bureau Gas Mask | `0x57C9EA469E42C97B` | PS5 preorder |
+| Threshold Bureau Workwear | `0xA70D57F494331711` | PS5 preorder |
+| Corrupted | `0x8F3741DBFF2CB8EB` | PC / PS5 preorder |
+| Pickpocket's Tool (charm) | `0x09FC268427CD1CD6` | PC / PS5 preorder |
+| Exposed (shirtless outfit) | `0x5F7C4166260F3CFD` | Also granted by the PC / PS5 preorder entitlement |
+
+Reward sources are mapped from the installed game data. **Corrupted** is the preorder body appearance; **Exposed** is a separate shirtless-base flag granted by the same entitlement. Exposed is included to preserve the full preorder grant, rather than being identified here as a separately advertised bonus. Pickpocket's Tool is a charm.
 
 ## How to use
 
@@ -90,9 +113,9 @@ Before editing, the program copies all four files into a new `CosmeticSaveBackup
 
 ## What changes
 
-- Removes any matching applied-entitlement entries `0x5C2B95A3`, `0x897D368C`, and `0x7BD90E22` from the selected header.
-- Restores eight known cosmetic world-state flags: six preorder flags and two additional flags associated with the cap and sunglasses.
-- Restores the two observed fallback outfit selections only when preorder flags were lost and those specific fallback values are present. Adding just the cap and sunglasses flags does not change your equipped outfit.
+- Restores the 14 item flags listed above (13 cosmetics and one charm), including flags missing from the save.
+- Removes matching applied-entitlement entries for PC preorder, PS5 preorder, NVIDIA, beta testers, both mailing promotions, all three Twitch drops, and the China promotion.
+- Restores the two observed fallback outfit selections only when preorder flags were lost and those specific fallback values are present. Adding promotional flags alone does not change your equipped outfit.
 - Recalculates the affected CRC32 checksums.
 
 Other outfit choices, preferences, other save sets, and the game executable are preserved. An already patched save requires no further changes.
@@ -117,11 +140,11 @@ Use `--no-pause` for terminal automation or `--help` for a short summary.
 
 Supports the analyzed save layout: RMDB 2/2, header version 16, global version 23, world facts version 4, and the known nine-slot outfit container. The program stops on invalid checksums, unsupported layouts, incomplete newest sets, ambiguous newest dates, or unrecognized files ending in `-header`.
 
-**The Windows version of 1.1.0's combined support for preorder cosmetics, the cap, and sunglasses was tested and confirmed working on the current game version**, as reported by the repository owner on September 27, 2026. The analyzed executable version is `0.563.737.9`. Future game updates may change the format or ownership behavior.
+**Windows v1.2.0 was tested and confirmed working on the current game version by the repository owner on September 27, 2026**, including the expanded promotional rewards. The analyzed executable version is `0.563.737.9`. Future game updates may change the format or ownership behavior.
 
 The Linux x64 build uses the same patching logic and compiled successfully. It has not been run on Linux or verified in game on Linux/Steam Deck yet.
 
-The new flags were identified together in a controlled save comparison. Individual flag-to-item and entitlement-category mappings remain unidentified.
+Item names, flag IDs, and the corresponding reward sources were read from the installed game's databases. The full supported item list is shown above.
 
 Running the game with a modified executable that grants the entitlement again may record it as applied again. Rerun this tool before returning to the original executable in that case.
 
@@ -147,4 +170,4 @@ The output is `publish/linux-x64/CosmeticSavePatcher-linux-x64`. The build downl
 
 [.NET runtime license and third-party notices](DOTNET-NOTICES.txt) are also embedded in the Linux executable.
 
-The Linux project was added after the original `v1.1.0` tag. To build it, use the source on `main` or the Linux source commit linked in the release notes; the release's automatically generated source archives reflect the original Windows release.
+Use source files from the version you want to build. The original `v1.1.0` tag predates Linux support; its automatic source archive does not contain the Linux project.

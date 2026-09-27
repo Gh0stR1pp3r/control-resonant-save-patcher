@@ -1,8 +1,45 @@
-COSMETIC SAVE PATCHER 1.1.0
+COSMETIC SAVE PATCHER 1.2.0
 
-Adds the two newly identified flags for the baseball cap and sunglasses.
-Windows build tested and confirmed working by the repository owner on
-September 27, 2026. Linux x64 build compiled, but not yet tested on Linux.
+Restores 13 cosmetics and the Pickpocket's Tool charm. Adds six promotional
+cosmetics to the eight item flags supported by 1.1.0. Windows v1.2.0 was
+tested and confirmed working on the current game version by the repository
+owner on September 27, 2026. Linux operation has not yet been tested.
+
+INCLUDED ITEMS
+
+Optical Filtering Goggles - Mailing promotion 2
+  0x2E27C13F1B8BE2AD
+Communications Department Headset - Mailing promotion 1
+  0x46780E853CF1A90B
+Sierra Helmet - Twitch drop 3
+  0xB961238CCE640F14
+Sierra Vest - Twitch drop 2
+  0xBF6BE35893F7D586
+Sierra Suit - Twitch drop 1
+  0xEF6FBC7BA02AB697
+MIO Specialist's Robe - China promotion
+  0xF37DC383C5C5E132
+Third Ice Baseball Cap - NVIDIA promotion
+  0x5388457983503C2E
+Cracked Standard Issue Sunglasses - Beta tester reward
+  0x747AFDEFDBABB85B
+Threshold Bureau Coat - PS5 preorder
+  0x2859E4A7F3D0F7FB
+Threshold Bureau Gas Mask - PS5 preorder
+  0x57C9EA469E42C97B
+Threshold Bureau Workwear - PS5 preorder
+  0xA70D57F494331711
+Corrupted - PC / PS5 preorder
+  0x8F3741DBFF2CB8EB
+Pickpocket's Tool (charm) - PC / PS5 preorder
+  0x09FC268427CD1CD6
+Exposed (shirtless outfit) - Also granted by the PC / PS5 preorder entitlement
+  0x5F7C4166260F3CFD
+
+Reward sources come from the installed game data. Corrupted is the preorder
+body appearance. Exposed is a separate shirtless-base flag granted by the
+same entitlement; it is not identified here as a separately advertised
+bonus. Pickpocket's Tool is a charm.
 
 WINDOWS
 
@@ -74,15 +111,14 @@ patching that copy, copy all four save files back into the original save
 folder before starting the game.
 
 What does it change?
-It removes the matching entitlement entries 5C2B95A3, 897D368C and 7BD90E22
-from the selected header, if present. It restores all eight known cosmetic
-world flags (six preorder flags plus the two additional flags associated
-with the cap and sunglasses), and updates CRC32 checksums as needed.
-It also works on supported saves where the new flags were never present.
+It restores the 14 item flags listed above, including missing entries,
+and removes matching applied-entitlement markers for PC preorder, PS5
+preorder, NVIDIA, beta testers, both mailing promotions, all three Twitch
+drops, and the China promotion. It updates CRC32 checksums as needed.
 If preorder flags were lost and the two known fallback outfit selections
-are found, it restores those selections too. Adding just the new cap and
-sunglasses flags does not change your equipped outfit. Equip them yourself
-from the cosmetic menu after patching. Other outfit choices are preserved.
+are found, it restores those selections too. Adding promotional flags
+alone does not change your equipped outfit. Equip the items yourself
+from the cosmetic menu. Other outfit choices are preserved.
 Preferences, other save sets, and the game executable are not edited.
 Running it again on an already patched save makes no further changes.
 
@@ -105,20 +141,20 @@ global 23, world facts 4, and the known nine-slot outfit container.
 It stops on bad checksums, unsupported layouts, incomplete newest sets,
 or tied newest timestamps. It does not guess new layouts after an update.
 Unknown header files ending in -header also cause it to stop.
-The Windows patcher for preorder cosmetics, the additional cap and
-sunglasses was tested and confirmed working on the current game version
-by the repository owner on September 27, 2026. Future game updates
-may change compatibility. A later run with a patched game EXE may record
-the entitlement entries again; rerun this tool before returning to the
-original EXE. Exact flag-to-item and category mappings remain unidentified.
+The Windows 1.2.0 patcher was tested and confirmed working on the current
+game version by the repository owner on September 27, 2026, including the
+six added promotional cosmetics. The analyzed game executable version is
+0.563.737.9. Item names and entitlement IDs come from the installed databases.
+Future game updates may change compatibility. A later run with a patched
+game EXE may record entitlement entries again; rerun this tool before
+returning to the original EXE.
 
-Upgrading from 1.0.0
+Upgrading from 1.0.0 or 1.1.0
 Replace the old patcher with this version for your OS and run beside saves.
-If the two extra flags are missing, it reports two cap/sunglasses flags
-to restore. Previously restored preorder flags are retained. If all eight
-flags are already enabled and the three entitlement entries are absent,
-"Already patched" is expected. Load the patched save with the original
-game EXE and equip the new items from the cosmetic menu.
+Previously supported unlocks are retained. If all 14 flags are already
+enabled and the ten associated entitlement entries are absent, the
+program reports Already patched. Load with the original game EXE and
+equip items from the cosmetic menu.
 
 Source and building
 Source files are available in the repository, and not needed to run it.
@@ -129,5 +165,5 @@ Linux x64 build (with .NET 8 SDK or later; may also build on Windows):
 Output: publish/linux-x64/CosmeticSavePatcher-linux-x64
 The build downloads official .NET runtime packages; no third-party
 application dependencies are used. Runtime version is pinned to 8.0.31.
-Use source from main or the Linux source commit linked in the release
-notes. Automatic source archives for v1.1.0 predate the Linux project.
+Use source files from the version you want to build. The original
+v1.1.0 automatic source archive predates the Linux project.

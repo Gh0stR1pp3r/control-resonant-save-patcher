@@ -9,22 +9,46 @@ using System.Security.Cryptography;
 using System.Text;
 
 [assembly: AssemblyTitle("Cosmetic Save Patcher")]
-[assembly: AssemblyVersion("1.1.0.0")]
-[assembly: AssemblyFileVersion("1.1.0.0")]
-[assembly: AssemblyInformationalVersion("1.1.0")]
+[assembly: AssemblyVersion("1.2.0.0")]
+[assembly: AssemblyFileVersion("1.2.0.0")]
+[assembly: AssemblyInformationalVersion("1.2.0")]
 
 internal static class Program
 {
-    const string Version = "1.1.0";
-    static readonly uint[] EntitlementsToRemove = { 0x5C2B95A3, 0x897D368C, 0x7BD90E22 };
+    const string Version = "1.2.0";
+    // Serialized entitlement IDs from the installed entitlement database.
+    // Remove applied markers so the existing revoke path cannot clear these rewards.
+    static readonly uint[] EntitlementsToRemove = {
+        0xB4F0E7DD, // PC preorder
+        0x5C2B95A3, // PlayStation preorder
+        0x7BD90E22, // NVIDIA
+        0x897D368C, // Beta testers
+        0xD8A2F11E, // Mailing promotion 1
+        0xD7A2EF8B, // Mailing promotion 2
+        0x50FAD256, // Twitch drop 1
+        0x4FFAD0C3, // Twitch drop 2
+        0x4EFACF30, // Twitch drop 3
+        0xECA4A890  // China promotion
+    };
     const int MaxFileBytes = 64 * 1024 * 1024;
     static readonly ulong[] PreorderUnlockFacts = {
-        0x09FC268427CD1CD6UL, 0x2859E4A7F3D0F7FBUL, 0x57C9EA469E42C97BUL,
-        0x5F7C4166260F3CFDUL, 0x8F3741DBFF2CB8EBUL, 0xA70D57F494331711UL
+        0x09FC268427CD1CD6UL, // Pickpocket's Tool (charm)
+        0x2859E4A7F3D0F7FBUL, // Threshold Bureau Coat
+        0x57C9EA469E42C97BUL, // Threshold Bureau Gas Mask
+        0x5F7C4166260F3CFDUL, // Exposed
+        0x8F3741DBFF2CB8EBUL, // Corrupted
+        0xA70D57F494331711UL  // Threshold Bureau Workwear
     };
-    // Both facts appeared with the cap and sunglasses. Their individual
-    // item/category mappings remain unknown; restore the confirmed pair.
-    static readonly ulong[] ExtraUnlockFacts = { 0x5388457983503C2EUL, 0x747AFDEFDBABB85BUL };
+    static readonly ulong[] ExtraUnlockFacts = {
+        0x5388457983503C2EUL, // Third Ice Baseball Cap
+        0x747AFDEFDBABB85BUL, // Cracked Standard Issue Sunglasses
+        0x2E27C13F1B8BE2ADUL, // Optical Filtering Goggles
+        0x46780E853CF1A90BUL, // Communications Department Headset
+        0xB961238CCE640F14UL, // Sierra Helmet
+        0xBF6BE35893F7D586UL, // Sierra Vest
+        0xEF6FBC7BA02AB697UL, // Sierra Suit
+        0xF37DC383C5C5E132UL  // MIO Specialist's Robe
+    };
     static readonly uint[] SlotIds = {
         0x22331ABB, 0x26332107, 0x2733229A, 0x25331F74, 0x1B330FB6,
         0x1C331149, 0x2833242D, 0x24331DE1, 0x21331928
@@ -48,7 +72,7 @@ internal static class Program
         try
         {
             Console.WriteLine("COSMETIC SAVE PATCHER " + Version + "\n");
-            Console.WriteLine("Preorder cosmetics + the additional cap and sunglasses.\n");
+            Console.WriteLine("13 cosmetics + Pickpocket's Tool charm: preorder and promotional rewards.\n");
             if (args.Any(a => a != "--check" && a != "--no-pause" && a != "--help"))
                 throw new InvalidOperationException("Unknown option. Use --help for instructions.");
             if (args.Contains("--help"))
@@ -63,7 +87,7 @@ internal static class Program
                     "-player and -bundle-container. Subfolders are not scanned.\n\n" +
                     "--check     Inspect only: do not patch or create backups.\n" +
                     "--no-pause  Exit without waiting for Enter.\n\n" +
-                    "Restores eight known cosmetic flags and removes up to three\n" +
+                    "Restores 14 item unlock flags and removes up to ten\n" +
                     "associated applied-entitlement entries.\n" +
                     "Supports the supplied game's header version 16 and global version 23.\n" +
                     "Backups are created automatically before patching.");
@@ -225,7 +249,7 @@ internal static class Program
         byte[] edited = (byte[])original.Clone();
         restoredSlots = 0;
         // Only missing PREORDER facts justify restoring the old fallback
-        // selections. Adding the two extra facts must not change outfits.
+        // selections. Adding promotional facts must not change outfits.
         // The new items become available for the user to equip themselves.
         if (restoredPreorderFacts > 0)
         {
@@ -307,8 +331,8 @@ internal static class Program
         if (!global.SequenceEqual(originals[stem + "persi-global"])) changes.Add(stem + "persi-global", global);
         if (!header.SequenceEqual(latest.Bytes)) changes.Add(latest.Path, header);
         foreach (var change in changes) Validate(change.Value, System.IO.Path.GetFileName(change.Key));
-        Console.WriteLine("Preorder unlock flags to restore: " + preorderFacts);
-        Console.WriteLine("Cap/sunglasses unlock flags to restore: " + extraFacts);
+        Console.WriteLine("Preorder item flags to restore (of " + PreorderUnlockFacts.Length + "): " + preorderFacts);
+        Console.WriteLine("Promotional cosmetic flags to restore (of " + ExtraUnlockFacts.Length + "): " + extraFacts);
         Console.WriteLine("Reverted outfit selections to restore: " + slots);
         Console.WriteLine("Entitlement entries to remove: " + latest.Entitlements.Count(id => EntitlementsToRemove.Contains(id)));
         if (changes.Count == 0) { Console.WriteLine("\nAlready patched. No files changed."); return; }
