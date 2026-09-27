@@ -3,7 +3,7 @@ COSMETIC SAVE PATCHER 1.2.0
 Restores 13 cosmetics and the Pickpocket's Tool charm. Adds six promotional
 cosmetics to the eight item flags supported by 1.1.0. Windows v1.2.0 was
 tested and confirmed working on the current game version by the repository
-owner on September 27, 2026. Linux operation has not yet been tested.
+owner on September 27, 2026. A Linux user reported successful execution (issue #2).
 
 INCLUDED ITEMS
 
@@ -67,8 +67,9 @@ LINUX X64
 Only that one file is needed. It includes .NET 8.0.31; no separate .NET
 installation or Wine is needed. It targets x64 Linux with glibc, not ARM
 or Alpine/musl. Its runtime extracts native libraries to the user's .net
-cache. Saves are read from beside the patcher. Linux/Steam Deck operation
-has not yet been tested.
+cache. Saves are read from beside the patcher. A Linux user reported
+successful execution in issue #2. The report does not specify a Linux
+distribution or confirm Steam Deck compatibility or in-game results.
 
 Steam save folder
 Windows:
@@ -83,15 +84,17 @@ Open your Steam folder, then userdata, your numbered account folder,
 beside the save files.
 
 Linux (Steam/Proton):
-<SteamLibrary-folder>/steamapps/compatdata/3669870/pfx/
+<Steam-folder>/userdata/<user-id>/3669870/remote/
 
-<SteamLibrary-folder> means the Steam library where the game is installed.
-Open it, then steamapps, compatdata, 3669870, and pfx.
-The pfx folder is the game's Windows environment under Proton. Save
-folders can be nested inside it. Find the folder containing files ending
-in -header, -persi-global, -player, and -bundle-container. You can search
-within pfx for *-header to find that folder. Put CosmeticSavePatcher-linux-x64
-beside the actual save files. The patcher does not search subfolders.
+<Steam-folder> means the Steam client folder containing userdata. It may
+be different from the Steam library where the game is installed.
+<user-id> means your Steam account's numbered folder inside userdata.
+Open your Steam folder, then userdata, your numbered account folder,
+3669870, and remote. Put CosmeticSavePatcher-linux-x64 inside remote,
+beside the files ending in -header, -persi-global, -player, and
+-bundle-container. The patcher does not search subfolders.
+A Linux user reported this location and successful execution in issue #2:
+https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/2
 
 The names in angle brackets are placeholders; do not type them literally.
 

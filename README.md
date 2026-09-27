@@ -9,7 +9,7 @@ A Windows and Linux x64 utility for restoring preorder and promotional items in 
 ## Downloads
 
 - **[Windows: CosmeticSavePatcher.exe](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/latest/download/CosmeticSavePatcher.exe)**
-- **[Linux x64: CosmeticSavePatcher-linux-x64](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/latest/download/CosmeticSavePatcher-linux-x64)** — includes .NET; no separate .NET installation or Wine needed. Built successfully, but not yet tested on Linux.
+- **[Linux x64: CosmeticSavePatcher-linux-x64](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/latest/download/CosmeticSavePatcher-linux-x64)** — includes .NET; no separate .NET installation or Wine needed. A Linux user reported successful execution in [issue #2](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/2).
 
 ## New in 1.2.0
 
@@ -82,15 +82,15 @@ Open your Steam folder, then `userdata`, your numbered account folder, `3669870`
 
 ### Linux (Steam/Proton)
 
-Start here:
-
 ```text
-<SteamLibrary-folder>/steamapps/compatdata/3669870/pfx/
+<Steam-folder>/userdata/<user-id>/3669870/remote/
 ```
 
-[`<SteamLibrary-folder>`](https://www.pcgamingwiki.com/wiki/Glossary:Game_data#Steam_client) is the Steam library where the game is installed. Open it, then `steamapps`, `compatdata`, `3669870`, and `pfx`.
+`<Steam-folder>` is the Steam client folder containing `userdata`. It may be different from the Steam library where the game is installed. `<user-id>` is your Steam account's numbered folder inside `userdata`.
 
-The `pfx` folder is the game's Windows environment under Proton; save folders can be nested inside it. See the [Proton save-folder explanation](https://github.com/ValveSoftware/Proton/wiki/Proton-FAQ#where-are-my-saved-games-located). Find the folder containing files ending in `-header`, `-persi-global`, `-player`, and `-bundle-container` (you can search within `pfx` for `*-header`). Place `CosmeticSavePatcher-linux-x64` **in that folder beside the actual save files**. The patcher only checks its own folder and does not search subfolders.
+Open the Steam folder, then `userdata`, your numbered account folder, `3669870`, and `remote`. Put `CosmeticSavePatcher-linux-x64` **inside `remote`, beside the actual save files** ending in `-header`, `-persi-global`, `-player`, and `-bundle-container`. The patcher only checks its own folder and does not search subfolders.
+
+A Linux user reported this location and successful execution of the patcher in [issue #2](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/2).
 
 The angle-bracket names above are placeholders, not text to type literally.
 
@@ -142,7 +142,7 @@ Supports the analyzed save layout: RMDB 2/2, header version 16, global version 2
 
 **Windows v1.2.0 was tested and confirmed working on the current game version by the repository owner on September 27, 2026**, including the expanded promotional rewards. The analyzed executable version is `0.563.737.9`. Future game updates may change the format or ownership behavior.
 
-The Linux x64 build uses the same patching logic and compiled successfully. It has not been run on Linux or verified in game on Linux/Steam Deck yet.
+The Linux x64 build uses the same patching logic. A Linux user reported that it ran successfully in [issue #2](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/2). The report does not specify a distribution or confirm Steam Deck compatibility or in-game results.
 
 Item names, flag IDs, and the corresponding reward sources were read from the installed game's databases. The full supported item list is shown above.
 
