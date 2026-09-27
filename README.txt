@@ -1,7 +1,10 @@
 COSMETIC SAVE PATCHER 1.1.0
 
 Adds the two newly identified flags for the baseball cap and sunglasses.
-Tested and confirmed working by the repository owner on September 27, 2026.
+Windows build tested and confirmed working by the repository owner on
+September 27, 2026. Linux x64 build compiled, but not yet tested on Linux.
+
+WINDOWS
 
 1. Close the game.
 2. Open the Steam save folder described below and put
@@ -14,15 +17,34 @@ The EXE is standalone: copy only CosmeticSavePatcher.exe to the save folder.
 No Python, installer, internet connection or administrator access is needed.
 It uses the .NET Framework provided with Windows 10/11.
 
+LINUX X64
+1. Close the game completely.
+2. Download CosmeticSavePatcher-linux-x64 and put it beside your save files.
+3. Open a terminal in that folder and run:
+     chmod +x CosmeticSavePatcher-linux-x64
+     ./CosmeticSavePatcher-linux-x64
+4. Read the result and press Enter to close. Start the game normally and
+   load the patched save.
+
+Only that one file is needed. It includes .NET 8.0.31; no separate .NET
+installation or Wine is needed. It targets x64 Linux with glibc, not ARM
+or Alpine/musl. Its runtime extracts native libraries to the user's .net
+cache. Saves are read from beside the patcher. Linux/Steam Deck operation
+has not yet been tested.
+
 Steam save folder
 <Steam-folder>\userdata\<user-id>\3669870\remote\
 
-<Steam-folder> means the folder where Steam is installed, usually:
+Linux:
+<Steam-folder>/userdata/<user-id>/3669870/remote/
+
+<Steam-folder> means Steam's folder containing userdata. On Windows, usually:
 C:\Program Files (x86)\Steam
+On Linux, use your Steam data folder; its location depends on installation.
 <user-id> means your Steam account's numbered folder inside userdata.
 
 Open your Steam folder, then userdata, your numbered account folder,
-3669870, and finally remote. Put CosmeticSavePatcher.exe inside remote,
+3669870, and finally remote. Put the patcher for your OS inside remote,
 beside the save files. The names in angle brackets are placeholders;
 do not type them literally.
 
@@ -34,10 +56,10 @@ must have the same prefix and end in:
   -player
   -bundle-container
 Keep all four together. The program uses the date inside each header,
-not the filename number or Windows modification date. It patches only
-the newest set in the same folder as the EXE, even when multiple save
+not the filename number or filesystem modification date. It patches only
+the newest set in the same folder as the patcher, even when multiple save
 slots are present. It does not search subfolders. For a particular save,
-put just its four files and the EXE into a separate folder. After
+put just its four files and the patcher into a separate folder. After
 patching that copy, copy all four save files back into your Steam remote
 folder before starting the game.
 
@@ -56,13 +78,15 @@ Running it again on an already patched save makes no further changes.
 
 Backups
 Before editing, it copies all four files into a new CosmeticSaveBackup-...
-folder beside the EXE. To undo: close the game and copy those four backup
+folder beside the patcher. To undo: close the game and copy those four backup
 files back into the save folder, replacing the patched copies.
 RESTORE.txt in each backup lists the original and patched file hashes.
 
 Checking without changing anything
-From a terminal run:
-  CosmeticSavePatcher.exe --check
+Windows PowerShell:
+  .\CosmeticSavePatcher.exe --check
+Linux (after chmod +x):
+  ./CosmeticSavePatcher-linux-x64 --check
 For terminal automation, add --no-pause. Use --help for a short summary.
 
 Supported saves
@@ -71,7 +95,7 @@ global 23, world facts 4, and the known nine-slot outfit container.
 It stops on bad checksums, unsupported layouts, incomplete newest sets,
 or tied newest timestamps. It does not guess new layouts after an update.
 Unknown header files ending in -header also cause it to stop.
-The combined patcher for preorder cosmetics, the additional cap and
+The Windows patcher for preorder cosmetics, the additional cap and
 sunglasses was tested and confirmed working on the current game version
 by the repository owner on September 27, 2026. Future game updates
 may change compatibility. A later run with a patched game EXE may record
@@ -79,7 +103,7 @@ the entitlement entries again; rerun this tool before returning to the
 original EXE. Exact flag-to-item and category mappings remain unidentified.
 
 Upgrading from 1.0.0
-Replace the old patcher EXE with this version and run it beside your saves.
+Replace the old patcher with this version for your OS and run beside saves.
 If the two extra flags are missing, it reports two cap/sunglasses flags
 to restore. Previously restored preorder flags are retained. If all eight
 flags are already enabled and the three entitlement entries are absent,
@@ -87,6 +111,13 @@ flags are already enabled and the three entitlement entries are absent,
 game EXE and equip the new items from the cosmetic menu.
 
 Source and building
-Program.cs and build.ps1 are included beside this README for transparency.
-They are not needed to run the EXE. Build with:
+Source files are available in the repository, and not needed to run it.
+Windows build:
   powershell -ExecutionPolicy Bypass -File build.ps1
+Linux x64 build (with .NET 8 SDK or later; may also build on Windows):
+  dotnet publish CosmeticSavePatcher.Linux.csproj -c Release -o publish/linux-x64
+Output: publish/linux-x64/CosmeticSavePatcher-linux-x64
+The build downloads official .NET runtime packages; no third-party
+application dependencies are used. Runtime version is pinned to 8.0.31.
+Use source from main or the Linux source commit linked in the release
+notes. Automatic source archives for v1.1.0 predate the Linux project.

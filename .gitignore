@@ -10,3 +10,7 @@ CosmeticSaveBackup-*/
 preferences_*
 .env
 .env.*
+bin/
+obj/
+publish/
+CosmeticSavePatcher-linux-*

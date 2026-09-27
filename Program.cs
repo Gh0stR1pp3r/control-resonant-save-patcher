@@ -53,7 +53,11 @@ internal static class Program
                 throw new InvalidOperationException("Unknown option. Use --help for instructions.");
             if (args.Contains("--help"))
             {
+#if NET8_0_OR_GREATER
+                Console.WriteLine("Place this program beside the save files and run it from a terminal.\n" +
+#else
                 Console.WriteLine("Place this EXE beside the save files and double-click it.\n" +
+#endif
                     "Close the game first. The newest save set in this folder is patched.\n" +
                     "Names may vary; matching files must end in -header, -persi-global,\n" +
                     "-player and -bundle-container. Subfolders are not scanned.\n\n" +
@@ -271,7 +275,11 @@ internal static class Program
 
     static void Run(bool checkOnly)
     {
+#if NET8_0_OR_GREATER
+        string directory = AppContext.BaseDirectory;
+#else
         string directory = AppDomain.CurrentDomain.BaseDirectory;
+#endif
         Console.WriteLine("Save folder: " + directory);
         string[] paths = Directory.GetFiles(directory, "*-header", SearchOption.TopDirectoryOnly);
         Require(paths.Length > 0, "No save files found beside this EXE. Place it with the four matching save files.");
