@@ -1,5 +1,7 @@
 # Control Resonant Save Patcher
 
+![Control Resonant](https://exputer.com/wp-content/uploads/2026/08/control-resonant.jpg)
+
 A Windows and Linux x64 utility for restoring preorder cosmetics **plus the additional baseball cap and sunglasses** in supported CONTROLResonant saves. Version **1.1.0** restores eight known cosmetic flags and removes the three associated applied-entitlement entries to avoid the observed revocation with the original game executable.
 
 ## Downloads
