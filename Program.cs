@@ -9,16 +9,22 @@ using System.Security.Cryptography;
 using System.Text;
 
 [assembly: AssemblyTitle("Cosmetic Save Patcher")]
-[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.1.0.0")]
+[assembly: AssemblyFileVersion("1.1.0.0")]
+[assembly: AssemblyInformationalVersion("1.1.0")]
 
 internal static class Program
 {
-    const uint Entitlement = 0x5C2B95A3;
+    const string Version = "1.1.0";
+    static readonly uint[] EntitlementsToRemove = { 0x5C2B95A3, 0x897D368C, 0x7BD90E22 };
     const int MaxFileBytes = 64 * 1024 * 1024;
-    static readonly ulong[] UnlockFacts = {
+    static readonly ulong[] PreorderUnlockFacts = {
         0x09FC268427CD1CD6UL, 0x2859E4A7F3D0F7FBUL, 0x57C9EA469E42C97BUL,
         0x5F7C4166260F3CFDUL, 0x8F3741DBFF2CB8EBUL, 0xA70D57F494331711UL
     };
+    // Both facts appeared with the cap and sunglasses. Their individual
+    // item/category mappings remain unknown; restore the confirmed pair.
+    static readonly ulong[] ExtraUnlockFacts = { 0x5388457983503C2EUL, 0x747AFDEFDBABB85BUL };
     static readonly uint[] SlotIds = {
         0x22331ABB, 0x26332107, 0x2733229A, 0x25331F74, 0x1B330FB6,
         0x1C331149, 0x2833242D, 0x24331DE1, 0x21331928
@@ -41,7 +47,8 @@ internal static class Program
         int status = 0;
         try
         {
-            Console.WriteLine("COSMETIC SAVE PATCHER\n");
+            Console.WriteLine("COSMETIC SAVE PATCHER " + Version + "\n");
+            Console.WriteLine("Preorder cosmetics + the additional cap and sunglasses.\n");
             if (args.Any(a => a != "--check" && a != "--no-pause" && a != "--help"))
                 throw new InvalidOperationException("Unknown option. Use --help for instructions.");
             if (args.Contains("--help"))
@@ -52,6 +59,8 @@ internal static class Program
                     "-player and -bundle-container. Subfolders are not scanned.\n\n" +
                     "--check     Inspect only: do not patch or create backups.\n" +
                     "--no-pause  Exit without waiting for Enter.\n\n" +
+                    "Restores eight known cosmetic flags and removes up to three\n" +
+                    "associated applied-entitlement entries.\n" +
                     "Supports the supplied game's header version 16 and global version 23.\n" +
                     "Backups are created automatically before patching.");
             }
@@ -144,18 +153,32 @@ internal static class Program
 
     static byte[] PatchHeader(SaveHeader header)
     {
-        if (!header.Entitlements.Contains(Entitlement)) return (byte[])header.Bytes.Clone();
-        byte[] result = new byte[header.Bytes.Length - 4];
+        var remaining = header.Entitlements.Where(id => !EntitlementsToRemove.Contains(id)).ToList();
+        int removed = header.Entitlements.Count - remaining.Count;
+        if (removed == 0) return (byte[])header.Bytes.Clone();
+        byte[] result = new byte[header.Bytes.Length - removed * 4];
         Buffer.BlockCopy(header.Bytes, 0, result, 0, header.CountPosition);
-        Put32(result, header.CountPosition, (uint)header.Entitlements.Count - 1);
+        Put32(result, header.CountPosition, (uint)remaining.Count);
         int pos = header.CountPosition + 4;
-        foreach (uint id in header.Entitlements)
-            if (id != Entitlement) { Put32(result, pos, id); pos += 4; }
+        foreach (uint id in remaining)
+        { Put32(result, pos, id); pos += 4; }
         Put32(result, 12, Crc32(result));
         return result;
     }
 
-    static byte[] PatchGlobal(byte[] original, out int restoredFacts, out int restoredSlots)
+    static int RestoreFacts(SortedDictionary<ulong, byte> facts, IEnumerable<ulong> keys)
+    {
+        int restored = 0;
+        foreach (ulong key in keys)
+        {
+            byte value;
+            if (!facts.TryGetValue(key, out value) || value == 0) restored++;
+            facts[key] = 1;
+        }
+        return restored;
+    }
+
+    static byte[] PatchGlobal(byte[] original, out int restoredPreorderFacts, out int restoredExtraFacts, out int restoredSlots)
     {
         Require(U32(original, 16) == 23 && U32(original, 20) == 4,
             "Unsupported global save or world-state version. No files were changed.");
@@ -176,13 +199,8 @@ internal static class Program
             facts.Add(key, value);
             previous = key;
         }
-        restoredFacts = 0;
-        foreach (ulong key in UnlockFacts)
-        {
-            byte value;
-            if (!facts.TryGetValue(key, out value) || value == 0) restoredFacts++;
-            facts[key] = 1;
-        }
+        restoredPreorderFacts = RestoreFacts(facts, PreorderUnlockFacts);
+        restoredExtraFacts = RestoreFacts(facts, ExtraUnlockFacts);
 
         // Recognize a full container, not just a short byte pattern.
         var containers = new List<int>();
@@ -202,9 +220,10 @@ internal static class Program
         Require(containers.Count == 1, "Could not identify one supported outfit container. No files were changed.");
         byte[] edited = (byte[])original.Clone();
         restoredSlots = 0;
-        // Restore only the observed fallback selections when flags were lost.
-        // Preserve other outfit choices and all overrides.
-        if (restoredFacts > 0)
+        // Only missing PREORDER facts justify restoring the old fallback
+        // selections. Adding the two extra facts must not change outfits.
+        // The new items become available for the user to equip themselves.
+        if (restoredPreorderFacts > 0)
         {
             for (int j = 0; j < 9; j++)
             {
@@ -272,17 +291,18 @@ internal static class Program
         Require(originals[latest.Path].SequenceEqual(latest.Bytes), "The save changed during inspection. Close the game and try again.");
         Console.WriteLine("Newest save: " + System.IO.Path.GetFileName(stem).TrimEnd('-'));
         Console.WriteLine("Saved (UTC): " + new DateTime(1970, 1, 1).AddSeconds(latest.Timestamp).ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
-        int facts, slots;
-        byte[] global = PatchGlobal(originals[stem + "persi-global"], out facts, out slots);
+        int preorderFacts, extraFacts, slots;
+        byte[] global = PatchGlobal(originals[stem + "persi-global"], out preorderFacts, out extraFacts, out slots);
         byte[] header = PatchHeader(latest);
         var changes = new Dictionary<string, byte[]>();
         // Global first: a process interruption cannot leave a half-written file.
         if (!global.SequenceEqual(originals[stem + "persi-global"])) changes.Add(stem + "persi-global", global);
         if (!header.SequenceEqual(latest.Bytes)) changes.Add(latest.Path, header);
         foreach (var change in changes) Validate(change.Value, System.IO.Path.GetFileName(change.Key));
-        Console.WriteLine("Unlock flags to restore: " + facts);
+        Console.WriteLine("Preorder unlock flags to restore: " + preorderFacts);
+        Console.WriteLine("Cap/sunglasses unlock flags to restore: " + extraFacts);
         Console.WriteLine("Reverted outfit selections to restore: " + slots);
-        Console.WriteLine("Entitlement entry to remove: " + (latest.Entitlements.Contains(Entitlement) ? "yes" : "already absent"));
+        Console.WriteLine("Entitlement entries to remove: " + latest.Entitlements.Count(id => EntitlementsToRemove.Contains(id)));
         if (changes.Count == 0) { Console.WriteLine("\nAlready patched. No files changed."); return; }
         if (checkOnly) { Console.WriteLine("\nCheck complete. No files changed. Run without --check to patch."); return; }
         CheckGameClosed();
@@ -306,7 +326,7 @@ internal static class Program
         string backup = System.IO.Path.Combine(directory, "CosmeticSaveBackup-" + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss") + "-" + Guid.NewGuid().ToString("N").Substring(0, 8));
         Directory.CreateDirectory(backup);
         Console.WriteLine("Backup: " + backup);
-        var log = new StringBuilder("Cosmetic Save Patcher 1.0\r\n\r\nClose the game, then copy the four save files from this backup folder\r\nback into the parent folder to undo this patch.\r\n\r\n");
+        var log = new StringBuilder("Cosmetic Save Patcher " + Version + "\r\n\r\nClose the game, then copy the four save files from this backup folder\r\nback into the parent folder to undo this patch.\r\n\r\n");
         foreach (var file in originals)
         {
             WriteNew(System.IO.Path.Combine(backup, System.IO.Path.GetFileName(file.Key)), file.Value);

@@ -1,8 +1,16 @@
 # Control Resonant Save Patcher
 
-A Windows utility for restoring the six known preorder cosmetic flags in a supported CONTROLResonant save and removing the applied-entitlement entry associated with their revocation.
+A Windows utility for restoring preorder cosmetics **plus the additional baseball cap and sunglasses** in supported CONTROLResonant saves. Version **1.1.0** restores eight known cosmetic flags and removes the three associated applied-entitlement entries to avoid the observed revocation with the original game executable.
 
-**[Download CosmeticSavePatcher.exe](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/download/v1.0.0/CosmeticSavePatcher.exe)**
+**[Download the latest CosmeticSavePatcher.exe](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/latest/download/CosmeticSavePatcher.exe)**
+
+## New in 1.1.0
+
+- Adds support for the additional baseball cap and sunglasses, including saves where their unlock flags were never present.
+- Preserves existing preorder unlocks when upgrading from 1.0.0.
+- Makes the new items available without changing your equipped outfit solely because their flags were added. Equip them from the cosmetic menu.
+
+To upgrade, replace the old patcher EXE with this version and run it beside your saves. No experimental game EXE is needed.
 
 ## How to use
 
@@ -43,9 +51,9 @@ Before editing, the program copies all four files into a new `CosmeticSaveBackup
 
 ## What changes
 
-- Removes entitlement ID `0x5C2B95A3` from the selected header.
-- Restores six known cosmetic world-state flags.
-- Restores the two observed fallback outfit selections when the flags were lost and those specific fallback values are present.
+- Removes any matching applied-entitlement entries `0x5C2B95A3`, `0x897D368C`, and `0x7BD90E22` from the selected header.
+- Restores eight known cosmetic world-state flags: six preorder flags and two additional flags associated with the cap and sunglasses.
+- Restores the two observed fallback outfit selections only when preorder flags were lost and those specific fallback values are present. Adding just the cap and sunglasses flags does not change your equipped outfit.
 - Recalculates the affected CRC32 checksums.
 
 Other outfit choices, preferences, other save sets, and the game executable are preserved. An already patched save requires no further changes.
@@ -62,7 +70,9 @@ Use `--no-pause` for terminal automation or `--help` for a short summary.
 
 Supports the analyzed save layout: RMDB 2/2, header version 16, global version 23, world facts version 4, and the known nine-slot outfit container. The program stops on invalid checksums, unsupported layouts, incomplete newest sets, ambiguous newest dates, or unrecognized files ending in `-header`.
 
-**Tested and confirmed working on the current game version**, as reported by the repository owner on September 26, 2026. Future game updates may change the format or ownership behavior.
+**Version 1.1.0's combined support for preorder cosmetics, the cap, and sunglasses was tested and confirmed working on the current game version**, as reported by the repository owner on September 27, 2026. The analyzed executable version is `0.563.737.9`. Future game updates may change the format or ownership behavior.
+
+The new flags were identified together in a controlled save comparison. Individual flag-to-item and entitlement-category mappings remain unidentified.
 
 Running the game with a modified executable that grants the entitlement again may record it as applied again. Rerun this tool before returning to the original executable in that case.
 

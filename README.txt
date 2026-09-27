@@ -1,4 +1,7 @@
-COSMETIC SAVE PATCHER
+COSMETIC SAVE PATCHER 1.1.0
+
+Adds the two newly identified flags for the baseball cap and sunglasses.
+Tested and confirmed working by the repository owner on September 27, 2026.
 
 1. Close the game.
 2. Open the Steam save folder described below and put
@@ -39,10 +42,15 @@ patching that copy, copy all four save files back into your Steam remote
 folder before starting the game.
 
 What does it change?
-It removes entitlement ID 5C2B95A3 from the selected header, restores the
-six known cosmetic world flags, and updates both CRC32 checksums as needed.
-If flags were lost and the two known fallback outfit selections are found,
-it restores those selections too. Other outfit choices are preserved.
+It removes the matching entitlement entries 5C2B95A3, 897D368C and 7BD90E22
+from the selected header, if present. It restores all eight known cosmetic
+world flags (six preorder flags plus the two additional flags associated
+with the cap and sunglasses), and updates CRC32 checksums as needed.
+It also works on supported saves where the new flags were never present.
+If preorder flags were lost and the two known fallback outfit selections
+are found, it restores those selections too. Adding just the new cap and
+sunglasses flags does not change your equipped outfit. Equip them yourself
+from the cosmetic menu after patching. Other outfit choices are preserved.
 Preferences, other save sets, and the game executable are not edited.
 Running it again on an already patched save makes no further changes.
 
@@ -63,10 +71,20 @@ global 23, world facts 4, and the known nine-slot outfit container.
 It stops on bad checksums, unsupported layouts, incomplete newest sets,
 or tied newest timestamps. It does not guess new layouts after an update.
 Unknown header files ending in -header also cause it to stop.
-Tested and confirmed working on the current game version, as reported
-by the repository owner on September 26, 2026. Future game updates
-may change compatibility. A later run with the patched game EXE may record the
-entitlement again; rerun this tool before returning to the original EXE.
+The combined patcher for preorder cosmetics, the additional cap and
+sunglasses was tested and confirmed working on the current game version
+by the repository owner on September 27, 2026. Future game updates
+may change compatibility. A later run with a patched game EXE may record
+the entitlement entries again; rerun this tool before returning to the
+original EXE. Exact flag-to-item and category mappings remain unidentified.
+
+Upgrading from 1.0.0
+Replace the old patcher EXE with this version and run it beside your saves.
+If the two extra flags are missing, it reports two cap/sunglasses flags
+to restore. Previously restored preorder flags are retained. If all eight
+flags are already enabled and the three entitlement entries are absent,
+"Already patched" is expected. Load the patched save with the original
+game EXE and equip the new items from the cosmetic menu.
 
 Source and building
 Program.cs and build.ps1 are included beside this README for transparency.
