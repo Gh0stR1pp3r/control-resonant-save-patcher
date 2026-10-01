@@ -2,7 +2,7 @@
 
 ![Control Resonant](https://exputer.com/wp-content/uploads/2026/08/control-resonant.jpg)
 
-A Windows and Linux x64 utility for restoring unobtainable outfits/items in supported Control Resonant saves. Version **1.2.0** restores **13 cosmetics plus the Pickpocket's Tool charm** and removes their associated applied-entitlement entries.
+A Windows and Linux x64 utility for restoring unobtainable outfits/items in supported Control Resonant saves. Source version **1.3.0** restores **13 cosmetics plus the Pickpocket's Tool charm** and removes their associated applied-entitlement entries.
 
 **Version 1.2.0 was tested and confirmed working on Windows with the current game version by the repository owner on September 27, 2026.**
 
@@ -10,8 +10,18 @@ A Windows and Linux x64 utility for restoring unobtainable outfits/items in supp
 
 ## Downloads
 
+The downloads below are the stable **v1.2.0** release for flat Steam saves. **Xbox WGS support is available in the v1.3.0 source on main; no WGS release binary has been published yet.** The earlier Windows/Linux confirmations apply to v1.2.0. The integrated WGS code has not yet been confirmed in game or through Xbox cloud synchronization.
+
 - **[Windows: CosmeticSavePatcher.exe](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/latest/download/CosmeticSavePatcher.exe)**
 - **[Linux x64: CosmeticSavePatcher-linux-x64](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/latest/download/CosmeticSavePatcher-linux-x64)** — includes .NET; no separate .NET installation or Wine needed. A Linux user reported successful execution in [issue #2](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/2).
+
+## New in 1.3.0 source
+
+- Adds Xbox app / Microsoft Store WGS file support, contributed by [hdfyeg35](https://github.com/hdfyeg35).
+- Resolves logical save names through `containers.index` and `container.N`, retaining the existing 14-item patch logic.
+- Rechecks complete metadata snapshots before writing, including patches that do not change file sizes.
+- Rejects linked parent directories, duplicate blob mappings, and ambiguous GUID references.
+- Backs up the four selected save blobs, `containers.index`, and the selected `container.N` with their original relative paths.
 
 ## New in 1.2.0
 
@@ -45,7 +55,7 @@ Reward sources are mapped from the installed game data. **Corrupted** is the pre
 
 ## How to use
 
-### Windows
+### Windows: Steam saves
 
 1. Close the game.
 2. Open your [Steam save folder](#steam-save-folder) and put `CosmeticSavePatcher.exe` inside it.
@@ -53,6 +63,18 @@ Reward sources are mapped from the installed game data. **Corrupted** is the pre
 4. Read the result, press Enter to close, then start the game and load that save.
 
 Only the EXE is needed. No Python, installer, internet connection, or administrator access is required. It uses the .NET Framework included with Windows 10/11.
+
+### Windows: Xbox app / Microsoft Store WGS
+
+Requires a build of the v1.3.0 source. Close the game and let any ongoing synchronization finish. Keep a full copy of the WGS account folder before first use.
+
+1. Open `%LOCALAPPDATA%\Packages\` and find the game's package folder beginning with `Remedy.CONTROLResonant_`.
+2. Open its `SystemAppData\wgs\` directory, then the account folder containing `containers.index`.
+3. Put the built `CosmeticSavePatcher.exe` directly beside `containers.index`.
+4. Run `.\CosmeticSavePatcher.exe --check` to inspect the selected save, then run it normally to apply the patch.
+5. Start the game and check the items. Make a normal in-game save. Cloud persistence has not yet been confirmed for this integration.
+
+WGS discovery follows only the folders and blobs referenced by the index. It is not a recursive search. It selects the newest header and stops if that save is incomplete; it does not fall back to an older save. If both different GUID files referenced by one entry exist, the patcher stops rather than guessing which is current.
 
 ### Linux x64
 
@@ -107,11 +129,15 @@ The patcher uses the date inside the save, not its filename number or filesystem
 -bundle-container
 ```
 
-Keep all four together. Only the newest set beside the patcher is patched, even if several save slots are present. Subfolders are not searched. To patch a particular save, put just its four files and the patcher in a separate folder. After patching that copy, copy all four save files back into the original save folder before starting the game.
+For flat saves, keep all four together beside the patcher; subfolders are not searched. To patch a particular flat save, put just its four files and the patcher in a separate folder. After patching that copy, copy all four save files back into the original save folder before starting the game.
+
+For WGS, these are logical filenames mapped by the index to GUID blobs. Keep the full account-folder structure intact, with the patcher beside `containers.index`. Both formats select the newest header and require all four matching files; they stop on ties or an incomplete newest save.
 
 ## Backups and undo
 
-Before editing, the program copies all four files into a new `CosmeticSaveBackup-...` folder. To undo, close the game and copy those four backup files back into the save folder. Each backup includes `RESTORE.txt` with file hashes.
+Before editing, the program copies all four selected save files into a new `CosmeticSaveBackup-...` folder. For WGS, it also backs up `containers.index` and the selected `container.N`, even when their contents do not need editing. Backup paths mirror the original GUID folders. Each backup includes `RESTORE.txt` with logical names, relative paths, and hashes.
+
+To undo, close the game and restore every backed-up file to its recorded path, including WGS metadata. Restore a WGS backup before making further saves or allowing synchronization to advance the store; a partial backup from an older store state may no longer match other containers. Keep the full account-folder copy for recovery after later changes.
 
 ## What changes
 
@@ -119,8 +145,9 @@ Before editing, the program copies all four files into a new `CosmeticSaveBackup
 - Removes matching applied-entitlement entries for PC preorder, PS5 preorder, NVIDIA, beta testers, both mailing promotions, all three Twitch drops, and the China promotion.
 - Restores the two observed fallback outfit selections only when preorder flags were lost and those specific fallback values are present. Adding promotional flags alone does not change your equipped outfit.
 - Recalculates the affected CRC32 checksums.
+- For WGS, updates the selected container byte total in `containers.index` only if the changed blobs have a different combined size. It preserves the GUID mapping and sync fields.
 
-Other outfit choices, preferences, other save sets, and the game executable are preserved. An already patched save requires no further changes.
+Other outfit choices, preferences, other save sets, and the game executable are preserved. WGS backups include metadata, and the index is updated only as described above. An already patched save requires no further changes.
 
 ## Check without editing
 
@@ -145,6 +172,8 @@ Supports the analyzed save layout: RMDB 2/2, header version 16, global version 2
 **Windows v1.2.0 was tested and confirmed working on the current game version by the repository owner on September 27, 2026**, including the expanded promotional rewards. The analyzed executable version is `0.563.737.9`. Future game updates may change the format or ownership behavior.
 
 The Linux x64 build uses the same patching logic. A Linux user reported that it ran successfully in [issue #2](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/2). The report does not specify a distribution or confirm Steam Deck compatibility or in-game results.
+
+The WGS storage reader accepts index version 14 and container metadata version 4. Unavailable referenced containers, ambiguous mappings, linked directories, and changing metadata cause it to stop. Shared source builds on Windows and Linux; the Xbox app WGS workflow is intended for Windows and is not a claim of Xbox cloud support on Linux.
 
 Item names, flag IDs, and the corresponding reward sources were read from the installed game's databases. The full supported item list is shown above.
 
@@ -175,3 +204,7 @@ Use source files from the version you want to build. The original `v1.1.0` tag p
 ## Maintainer and agent documentation
 
 Start with [AGENTS.md](AGENTS.md). Technical references cover the [save format and supported flags](docs/save-format.md), [findings and evidence](docs/findings.md), and [build and release workflow](docs/releasing.md).
+
+## Credits
+
+Xbox WGS file support was contributed by [hdfyeg35](https://github.com/hdfyeg35), with metadata and path-safety fixes added during integration.

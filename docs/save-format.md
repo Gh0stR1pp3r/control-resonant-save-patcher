@@ -1,6 +1,6 @@
 # Save format and patch boundaries
 
-Baseline: `Program.cs` in v1.2.0. This is a partial decoder for the observed layout, not a general specification of every Control Resonant save version. All offsets below are decimal byte offsets from the start of a file unless stated otherwise. Serialized numbers use little-endian byte order.
+Baseline: v1.3.0 source; the RMDB payload logic is retained from v1.2.0. See [WGS support](wgs-support.md) for storage metadata and backups. This is a partial decoder for the observed layout, not a general specification of every Control Resonant save version. All offsets below are decimal byte offsets from the start of a file unless stated otherwise. Serialized numbers use little-endian byte order.
 
 ## Save selection and files
 
@@ -13,7 +13,7 @@ A set consists of four files with the same prefix:
 <prefix>-bundle-container
 ```
 
-Enumerate `*-header` beside the patcher. Parse every candidate, select the greatest embedded timestamp, reject ties, and require its complete four-file set. An invalid candidate header stops processing. The application uses its executable directory, not the terminal's working directory. It does not search subdirectories or fall back to an older complete set.
+Enumerate `*-header` beside the patcher. Parse every candidate, select the greatest embedded timestamp, reject ties, and require its complete four-file set. An invalid candidate header stops processing. The application uses its executable directory, not the terminal's working directory. Flat discovery does not search subdirectories; WGS follows explicit index references. Neither path falls back to an older complete set.
 
 Files must be regular files without a reparse-point attribute, between 20 bytes and 64 MiB. These are implementation limits, not claims about every valid game save.
 
@@ -123,6 +123,6 @@ These were observed fallback values. Do not generalize them into arbitrary outfi
 
 `--check` calculates and reports proposed changes without writing or creating backups. A no-op patch also creates no backup.
 
-For an actual change, check that the game is closed, take the patcher lock, back up all four files to a unique `CosmeticSaveBackup-...` directory, and record original/patched SHA-256 hashes in `RESTORE.txt`. Stage changed files, recheck the game process and all original bytes, then replace changed files. Only header/global files are edited. Attempt rollback from preserved originals on failure.
+For an actual change, check that the game is closed, take the patcher lock, back up all four files to a unique `CosmeticSaveBackup-...` directory, and record original/patched SHA-256 hashes in `RESTORE.txt`. Stage changed files, recheck the game process and all original bytes, then replace changed files. Only header/global payloads are edited; for WGS the selected indexed byte total is adjusted if needed. WGS backups always include the selected container mapping and index. Attempt rollback from preserved originals on failure.
 
-Replacement is per file, not a transaction over the entire set. A crash between replacements can still require restoring the four-file backup. Process detection currently uses the name `CONTROLResonant`; its reliability across Proton configurations is not independently established.
+Replacement is per file, not a transaction over the entire set. A crash between replacements can still require restoring all backed-up paths, including WGS metadata. Process detection currently uses the name `CONTROLResonant`; its reliability across Proton configurations is not independently established.

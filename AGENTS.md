@@ -1,6 +1,6 @@
 # Working on Control Resonant Save Patcher
 
-This repository contains a small save editor for Control Resonant. Read this file before changing the implementation. The documented baseline is v1.2.0, September 27, 2026; inspect the current source and release before assuming that baseline is still current.
+This repository contains a small save editor for Control Resonant. Read this file before changing the implementation. Source is v1.3.0 with integrated WGS support (October 1, 2026); the published stable binary baseline is v1.2.0; inspect the current source and release before assuming that baseline is still current.
 
 ## Start here
 
@@ -20,8 +20,8 @@ This repository contains a small save editor for Control Resonant. Read this fil
 ## Working rules
 
 - Preserve unrelated facts, outfit choices, save sets, and preferences. Changes to the supported reward list need evidence and must fit the user's requested scope.
-- Keep checksum and layout validation, backups of all four save files, change detection before writing, and rollback handling. Stop on unsupported layouts instead of guessing offsets.
-- Select the newest save by its embedded timestamp, never by its filename number or filesystem modification time. Scan beside the executable, without recursing.
+- Keep checksum and layout validation, backups of all four save files plus selected WGS metadata, full metadata-snapshot comparisons before writing (including zero-size-delta patches), and rollback handling. Stop on unsupported layouts instead of guessing offsets.
+- Select the newest save by its embedded timestamp, never by its filename number or filesystem modification time. Scan flat saves beside the executable. WGS discovery may follow only explicitly indexed container paths; do not recursively search arbitrary folders.
 - Use **Control Resonant** in player-facing text. Keep `CONTROLResonant` where an actual process identifier is required, such as `Process.GetProcessesByName`.
 - Do not reintroduce references to experimental or modified game executables in the player README.
 - Do not commit personal saves, game executables, extracted game assets, credentials, or local publication journals. Publish only explicitly selected project files.
@@ -45,3 +45,5 @@ dotnet publish CosmeticSavePatcher.Linux.csproj -c Release -o publish/linux-x64
 ```
 
 See the release guide before changing versions, runtime packages, release assets, or compatibility claims. Keep these documents current when behavior or evidence changes.
+
+Xbox WGS file support is credited to [hdfyeg35](https://github.com/hdfyeg35); preserve this credit and contributor history. See [WGS integration](docs/wgs-support.md).

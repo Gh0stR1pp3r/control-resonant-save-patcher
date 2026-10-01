@@ -56,3 +56,9 @@ The patcher's 14-item scope is intentional. Do not enable every discovered world
 - Runtime ownership checks and the save layout may change after updates.
 - Linux process detection and save replacement behavior have not been exhaustively checked across distributions or Proton variants.
 - Successful compilation, successful program execution, and confirmed in-game persistence are separate evidence levels. Preserve those distinctions in future documentation.
+
+## WGS integration, October 1, 2026
+
+Xbox WGS file support from [hdfyeg35](https://github.com/hdfyeg35), commit `2de2299b72fab471d8f67988c1dc7702422a03b4`, is integrated in v1.3.0 source. Integration adds full metadata snapshot checks, rejects linked parent directories and ambiguous GUID mappings, and always backs up the selected mapping plus index. See [implementation details and limits](wgs-support.md).
+
+The fork reports analysis of supplied Xbox saves. No WGS in-game confirmation or cloud-persistence confirmation has been established for this integrated version. Earlier v1.2.0 confirmations concern flat saves. No implementation tests were requested or run during integration.

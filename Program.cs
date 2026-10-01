@@ -9,13 +9,18 @@ using System.Security.Cryptography;
 using System.Text;
 
 [assembly: AssemblyTitle("Cosmetic Save Patcher")]
-[assembly: AssemblyVersion("1.2.0.0")]
-[assembly: AssemblyFileVersion("1.2.0.0")]
-[assembly: AssemblyInformationalVersion("1.2.0")]
+[assembly: AssemblyVersion("1.3.0.0")]
+[assembly: AssemblyFileVersion("1.3.0.0")]
+[assembly: AssemblyInformationalVersion("1.3.0")]
 
 internal static class Program
 {
-    const string Version = "1.2.0";
+    const string Version = "1.3.0";
+    // Xbox WGS storage support contributed by https://github.com/hdfyeg35.
+    static readonly StringComparison PathComparison = System.IO.Path.DirectorySeparatorChar == '\\'
+        ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+    static readonly StringComparer PathComparer = System.IO.Path.DirectorySeparatorChar == '\\'
+        ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
     // Serialized entitlement IDs from the installed entitlement database.
     // Remove applied markers so the existing revoke path cannot clear these rewards.
     static readonly uint[] EntitlementsToRemove = {
@@ -65,6 +70,22 @@ internal static class Program
         public List<uint> Entitlements;
     }
 
+    sealed class SaveContainer
+    {
+        public string Name;
+        public Dictionary<string, string> Files;
+        public string IndexPath;
+        public string MetadataPath;
+        public long IndexSizeOffset;
+        public ulong IndexedSize;
+    }
+
+    sealed class SaveCandidate
+    {
+        public SaveContainer Container;
+        public SaveHeader Header;
+    }
+
     static int Main(string[] args)
     {
         bool noPause = args.Contains("--no-pause");
@@ -82,9 +103,10 @@ internal static class Program
 #else
                 Console.WriteLine("Place this EXE beside the save files and double-click it.\n" +
 #endif
-                    "Close the game first. The newest save set in this folder is patched.\n" +
-                    "Names may vary; matching files must end in -header, -persi-global,\n" +
-                    "-player and -bundle-container. Subfolders are not scanned.\n\n" +
+                    "Close the game first. The newest save must have all four matching files.\n" +
+                    "Steam: place the patcher beside the flat save files.\n" +
+                    "Xbox PC: place it beside containers.index in the per-user WGS folder.\n" +
+                    "WGS containers are not rebuilt; only mapped blobs and required size metadata change.\n\n" +
                     "--check     Inspect only: do not patch or create backups.\n" +
                     "--no-pause  Exit without waiting for Enter.\n\n" +
                     "Restores 14 item unlock flags and removes up to ten\n" +
@@ -283,18 +305,230 @@ internal static class Program
         using (var sha = SHA256.Create()) return BitConverter.ToString(sha.ComputeHash(bytes)).Replace("-", "").ToLowerInvariant();
     }
 
+    static string RelativeSavePath(string directory, string path)
+    {
+        RequireSafeSavePath(directory, path);
+        string root = System.IO.Path.GetFullPath(directory).TrimEnd(
+            System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar) + System.IO.Path.DirectorySeparatorChar;
+        string target = System.IO.Path.GetFullPath(path);
+        Require(target.StartsWith(root, PathComparison), "Save file resolved outside the selected save folder.");
+        return target.Substring(root.Length);
+    }
+
+    static void RequireSafeSavePath(string directory, string path)
+    {
+        string root = System.IO.Path.GetFullPath(directory).TrimEnd(
+            System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar)
+            + System.IO.Path.DirectorySeparatorChar;
+        string target = System.IO.Path.GetFullPath(path);
+        Require(target.StartsWith(root, PathComparison), "Save file resolved outside the selected save folder.");
+        // GetFullPath is lexical: inspect every parent under the selected root
+        // so a GUID-directory junction cannot redirect blob writes elsewhere.
+        string parent = System.IO.Path.GetDirectoryName(target);
+        while (true)
+        {
+            Require(!string.IsNullOrEmpty(parent) && Directory.Exists(parent), "Missing save parent directory.");
+            Require((File.GetAttributes(parent) & FileAttributes.ReparsePoint) == 0,
+                "Linked save directories are not supported: " + parent);
+            string normalized = parent.TrimEnd(System.IO.Path.DirectorySeparatorChar,
+                System.IO.Path.AltDirectorySeparatorChar) + System.IO.Path.DirectorySeparatorChar;
+            if (string.Equals(normalized, root, PathComparison)) break;
+            Require(normalized.StartsWith(root, PathComparison), "Save parent resolved outside the selected folder.");
+            parent = System.IO.Path.GetDirectoryName(parent);
+        }
+        RegularFile(target);
+    }
+
+    static void RequireMetadataUnchanged(string directory, Dictionary<string, byte[]> snapshots)
+    {
+        foreach (var snapshot in snapshots)
+        {
+            RequireSafeSavePath(directory, snapshot.Key);
+            Require(ReadMetadata(snapshot.Key, 8, 16 * 1024 * 1024).SequenceEqual(snapshot.Value),
+                "WGS metadata changed during inspection. Wait for synchronization to finish and try again.");
+        }
+    }
+
     static void WriteNew(string path, byte[] data)
     {
         using (var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None))
         { stream.Write(data, 0, data.Length); stream.Flush(true); }
     }
-
     static void CheckGameClosed()
     {
         var processes = Process.GetProcessesByName("CONTROLResonant");
         bool running = processes.Length != 0;
         foreach (var p in processes) p.Dispose();
-        Require(!running, "Close CONTROLResonant before patching, then run this program again.");
+        Require(!running, "Close Control Resonant before patching, then run this program again.");
+    }
+
+    static byte[] ReadMetadata(string path, int minimumBytes, int maximumBytes)
+    {
+        RegularFile(path);
+        long size = new FileInfo(path).Length;
+        Require(size >= minimumBytes && size <= maximumBytes,
+            "Unexpected WGS metadata size: " + System.IO.Path.GetFileName(path));
+        byte[] bytes = File.ReadAllBytes(path);
+        Require(bytes.Length == size, "WGS metadata changed while reading.");
+        return bytes;
+    }
+
+    static string ReadWgsString(BinaryReader reader, string field)
+    {
+        Require(reader.BaseStream.Length - reader.BaseStream.Position >= 4,
+            "Truncated WGS " + field + ".");
+        uint length = reader.ReadUInt32();
+        Require(length <= 4096, "Unexpected WGS " + field + " length.");
+        long byteLength = (long)length * 2;
+        Require(reader.BaseStream.Length - reader.BaseStream.Position >= byteLength,
+            "Truncated WGS " + field + ".");
+        byte[] bytes = reader.ReadBytes((int)byteLength);
+        return new UnicodeEncoding(false, false, true).GetString(bytes);
+    }
+
+    static string ReadWgsGuidFolder(BinaryReader reader, string field)
+    {
+        Require(reader.BaseStream.Length - reader.BaseStream.Position >= 16,
+            "Truncated WGS " + field + ".");
+        byte[] bytes = reader.ReadBytes(16);
+        return new Guid(bytes).ToString("N").ToUpperInvariant();
+    }
+
+    static string WgsEntryName(byte[] metadata, int at)
+    {
+        Bounds(metadata, at, 128);
+        string name = new UnicodeEncoding(false, false, true).GetString(metadata, at, 128).TrimEnd('\0');
+        Require(name.Length != 0 && name.IndexOf('\0') < 0, "Invalid WGS blob name.");
+        return name;
+    }
+
+    static string WgsEntryGuid(byte[] metadata, int at)
+    {
+        Bounds(metadata, at, 16);
+        byte[] bytes = new byte[16];
+        Buffer.BlockCopy(metadata, at, bytes, 0, 16);
+        return new Guid(bytes).ToString("N").ToUpperInvariant();
+    }
+
+    static Dictionary<string, string> ReadWgsContainerFiles(string directory, string containerDirectory,
+        string metadataPath, out byte[] metadata)
+    {
+        RequireSafeSavePath(directory, metadataPath);
+        metadata = ReadMetadata(metadataPath, 8, 16 * 1024 * 1024);
+        Require(U32(metadata, 0) == 4, "Unsupported WGS container metadata version.");
+        uint count = U32(metadata, 4);
+        Require(count <= 10000 && 8L + count * 160L == metadata.Length,
+            "Unsupported WGS container metadata layout.");
+        var files = new Dictionary<string, string>(StringComparer.Ordinal);
+        var physicalPaths = new HashSet<string>(PathComparer);
+        for (int i = 0; i < count; i++)
+        {
+            int at = 8 + i * 160;
+            string name = WgsEntryName(metadata, at);
+            Require(name.IndexOf('/') < 0 && name.IndexOf('\\') < 0 && name.IndexOf(':') < 0
+                && name != "." && name != "..", "Unsupported WGS blob name.");
+            string firstGuid = WgsEntryGuid(metadata, at + 128);
+            string secondGuid = WgsEntryGuid(metadata, at + 144);
+            string firstPath = System.IO.Path.Combine(containerDirectory, firstGuid);
+            string secondPath = System.IO.Path.Combine(containerDirectory, secondGuid);
+            bool firstExists = File.Exists(firstPath), secondExists = File.Exists(secondPath);
+            Require(!(firstExists && secondExists && !string.Equals(firstPath, secondPath, PathComparison)),
+                "Ambiguous WGS blob references for " + name + ". Both GUID files exist; no files were changed.");
+            string path = secondExists ? secondPath : firstPath;
+            Require(File.Exists(path), "Missing WGS blob for " + name + ".");
+            RequireSafeSavePath(directory, path);
+            Require(!files.ContainsKey(name), "Duplicate WGS blob name: " + name);
+            Require(physicalPaths.Add(path), "Multiple WGS names reference the same physical blob.");
+            files.Add(name, path);
+        }
+        return files;
+    }
+
+    static List<SaveContainer> ReadWgsSaveContainers(string directory, Dictionary<string, byte[]> metadataSnapshots)
+    {
+        string indexPath = System.IO.Path.Combine(directory, "containers.index");
+        RequireSafeSavePath(directory, indexPath);
+        byte[] index = ReadMetadata(indexPath, 32, 16 * 1024 * 1024);
+        metadataSnapshots.Add(indexPath, index);
+        var result = new List<SaveContainer>();
+        try
+        {
+            using (var stream = new MemoryStream(index, false))
+            using (var reader = new BinaryReader(stream, Encoding.Unicode))
+            {
+                Require(reader.ReadUInt32() == 14, "Unsupported containers.index version.");
+                uint count = reader.ReadUInt32();
+                Require(count > 0 && count <= 1024, "Unexpected WGS container count.");
+                reader.ReadUInt32();
+                string package = ReadWgsString(reader, "package name");
+                Require(package.StartsWith("Remedy.CONTROLResonant_", StringComparison.OrdinalIgnoreCase),
+                    "containers.index is not a Control Resonant save.");
+                reader.ReadUInt64();
+                reader.ReadUInt32();
+                ReadWgsString(reader, "account identifier");
+                reader.ReadUInt64();
+                for (int i = 0; i < count; i++)
+                {
+                    string name = ReadWgsString(reader, "container name");
+                    ReadWgsString(reader, "container display name");
+                    ReadWgsString(reader, "container cloud id");
+                    byte sequence = reader.ReadByte();
+                    reader.ReadUInt32();
+                    string folder = ReadWgsGuidFolder(reader, "container id");
+                    reader.ReadUInt64();
+                    reader.ReadUInt64();
+                    long sizeOffset = stream.Position;
+                    ulong indexedSize = reader.ReadUInt64();
+                    string containerDirectory = System.IO.Path.Combine(directory, folder);
+                    string metadataPath = System.IO.Path.Combine(containerDirectory,
+                        "container." + sequence.ToString(CultureInfo.InvariantCulture));
+                    Require(Directory.Exists(containerDirectory), "Missing WGS container directory for " + name + ".");
+                    byte[] metadata;
+                    var files = ReadWgsContainerFiles(directory, containerDirectory, metadataPath, out metadata);
+                    Require(!metadataSnapshots.ContainsKey(metadataPath), "Duplicate WGS container reference.");
+                    metadataSnapshots.Add(metadataPath, metadata);
+                    long actualSize = files.Values.Sum(path => new FileInfo(path).Length);
+                    Require(indexedSize <= long.MaxValue && actualSize == (long)indexedSize,
+                        "WGS container size does not match containers.index for " + name + ".");
+                    if (files.Keys.Any(file => file.EndsWith("-header", StringComparison.Ordinal)))
+                    {
+                        result.Add(new SaveContainer { Name = name, Files = files, IndexPath = indexPath, MetadataPath = metadataPath,
+                            IndexSizeOffset = sizeOffset, IndexedSize = indexedSize });
+                    }
+                }
+                Require(stream.Position == stream.Length, "Unsupported trailing data in containers.index.");
+            }
+        }
+        catch (EndOfStreamException)
+        {
+            throw new InvalidDataException("containers.index is truncated.");
+        }
+        Require(result.Count > 0, "No Control Resonant save containers were found in containers.index.");
+        return result;
+    }
+
+    static List<SaveContainer> DiscoverSaveContainers(string directory, out bool wgs,
+        out Dictionary<string, byte[]> metadataSnapshots)
+    {
+        metadataSnapshots = new Dictionary<string, byte[]>(PathComparer);
+        string indexPath = System.IO.Path.Combine(directory, "containers.index");
+        if (File.Exists(indexPath))
+        {
+            wgs = true;
+            Console.WriteLine("Save format: Xbox / Microsoft Store WGS");
+            return ReadWgsSaveContainers(directory, metadataSnapshots);
+        }
+        wgs = false;
+        Console.WriteLine("Save format: flat files (Steam/compatible)");
+        var files = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (string path in Directory.GetFiles(directory, "*", SearchOption.TopDirectoryOnly))
+        {
+            string name = System.IO.Path.GetFileName(path);
+            if (!Suffixes.Any(suffix => name.EndsWith("-" + suffix, StringComparison.Ordinal))) continue;
+            Require(!files.ContainsKey(name), "Duplicate save filename: " + name);
+            files.Add(name, path);
+        }
+        return new List<SaveContainer> { new SaveContainer { Name = "flat", Files = files } };
     }
 
     static void Run(bool checkOnly)
@@ -305,32 +539,82 @@ internal static class Program
         string directory = AppDomain.CurrentDomain.BaseDirectory;
 #endif
         Console.WriteLine("Save folder: " + directory);
-        string[] paths = Directory.GetFiles(directory, "*-header", SearchOption.TopDirectoryOnly);
-        Require(paths.Length > 0, "No save files found beside this EXE. Place it with the four matching save files.");
-        var headers = paths.Select(p => ParseHeader(p, Read(p))).OrderByDescending(h => h.Timestamp).ToList();
-        SaveHeader latest = headers[0];
-        Require(headers.Count(h => h.Timestamp == latest.Timestamp) == 1,
-            "Multiple save sets share the newest date. Place just the desired set with this EXE in a separate folder.");
+        bool wgs;
+        Dictionary<string, byte[]> metadataSnapshots;
+        List<SaveContainer> containers = DiscoverSaveContainers(directory, out wgs, out metadataSnapshots);
+        var candidates = new List<SaveCandidate>();
+        foreach (SaveContainer container in containers)
+        {
+            foreach (var file in container.Files)
+            {
+                if (!file.Key.EndsWith("-header", StringComparison.Ordinal)) continue;
+                RequireSafeSavePath(directory, file.Value);
+                candidates.Add(new SaveCandidate { Container = container, Header = ParseHeader(file.Key, Read(file.Value)) });
+            }
+        }
+        Require(candidates.Count > 0, wgs
+            ? "No Control Resonant save headers were found in the active WGS containers."
+            : "No save files found beside this EXE. Place it with the four matching save files.");
+        candidates = candidates.OrderByDescending(candidate => candidate.Header.Timestamp).ToList();
+        SaveCandidate latestCandidate = candidates[0];
+        SaveHeader latest = latestCandidate.Header;
+        Require(candidates.Count(candidate => candidate.Header.Timestamp == latest.Timestamp) == 1,
+            "Multiple save sets share the newest date. Keep only the desired flat save set, or resolve the WGS ambiguity before patching.");
         string stem = latest.Path.Substring(0, latest.Path.Length - "header".Length);
-        var originals = new Dictionary<string, byte[]>();
+        var originals = new Dictionary<string, byte[]>(StringComparer.Ordinal);
+        var filePaths = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (string suffix in Suffixes)
         {
-            string path = stem + suffix;
+            string name = stem + suffix;
+            string path;
+            Require(latestCandidate.Container.Files.TryGetValue(name, out path), "Missing matching save file: " + name);
+            RequireSafeSavePath(directory, path);
             byte[] data = Read(path);
-            Validate(data, System.IO.Path.GetFileName(path));
-            originals.Add(path, data);
+            Validate(data, name);
+            originals.Add(name, data);
+            filePaths.Add(name, path);
         }
         Require(originals[latest.Path].SequenceEqual(latest.Bytes), "The save changed during inspection. Close the game and try again.");
         Console.WriteLine("Newest save: " + System.IO.Path.GetFileName(stem).TrimEnd('-'));
+        if (wgs) Console.WriteLine("WGS container: " + latestCandidate.Container.Name);
         Console.WriteLine("Saved (UTC): " + new DateTime(1970, 1, 1).AddSeconds(latest.Timestamp).ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
         int preorderFacts, extraFacts, slots;
         byte[] global = PatchGlobal(originals[stem + "persi-global"], out preorderFacts, out extraFacts, out slots);
         byte[] header = PatchHeader(latest);
-        var changes = new Dictionary<string, byte[]>();
+        var changes = new Dictionary<string, byte[]>(StringComparer.Ordinal);
         // Global first: a process interruption cannot leave a half-written file.
         if (!global.SequenceEqual(originals[stem + "persi-global"])) changes.Add(stem + "persi-global", global);
         if (!header.SequenceEqual(latest.Bytes)) changes.Add(latest.Path, header);
-        foreach (var change in changes) Validate(change.Value, System.IO.Path.GetFileName(change.Key));
+        foreach (var change in changes) Validate(change.Value, change.Key);
+        if (wgs && changes.Count != 0)
+        {
+            SaveContainer wgsContainer = latestCandidate.Container;
+            // Back up the original mapping even for a same-size patch. Never
+            // combine offsets from discovery with a later index snapshot.
+            const string indexName = "containers.index";
+            byte[] indexOriginal = metadataSnapshots[wgsContainer.IndexPath];
+            originals.Add(indexName, indexOriginal);
+            filePaths.Add(indexName, wgsContainer.IndexPath);
+            string metadataName = RelativeSavePath(directory, wgsContainer.MetadataPath);
+            originals.Add(metadataName, metadataSnapshots[wgsContainer.MetadataPath]);
+            filePaths.Add(metadataName, wgsContainer.MetadataPath);
+            long sizeDelta = changes.Sum(change => (long)change.Value.Length - originals[change.Key].Length);
+            if (sizeDelta != 0)
+            {
+                Require(wgsContainer.IndexSizeOffset >= 0 && wgsContainer.IndexSizeOffset <= int.MaxValue - 8,
+                    "Unsupported WGS index size field location.");
+                int sizeOffset = (int)wgsContainer.IndexSizeOffset;
+                Require(U64(indexOriginal, sizeOffset) == wgsContainer.IndexedSize,
+                    "containers.index changed during inspection. Close the game and try again.");
+                long newSize = checked((long)wgsContainer.IndexedSize + sizeDelta);
+                Require(newSize >= 0, "Invalid WGS container size after patching.");
+                byte[] indexPatched = (byte[])indexOriginal.Clone();
+                // Keep the existing WGS sync state/timestamps and only keep the indexed byte total consistent.
+                Buffer.BlockCopy(BitConverter.GetBytes((ulong)newSize), 0, indexPatched, sizeOffset, 8);
+                changes.Add(indexName, indexPatched);
+            }
+        }
+        RequireMetadataUnchanged(directory, metadataSnapshots);
         Console.WriteLine("Preorder item flags to restore (of " + PreorderUnlockFacts.Length + "): " + preorderFacts);
         Console.WriteLine("Promotional cosmetic flags to restore (of " + ExtraUnlockFacts.Length + "): " + extraFacts);
         Console.WriteLine("Reverted outfit selections to restore: " + slots);
@@ -342,47 +626,64 @@ internal static class Program
         try
         {
             using (var exclusive = new FileStream(lockPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
-                Commit(directory, originals, changes);
+                Commit(directory, filePaths, originals, changes, metadataSnapshots);
         }
         finally
         {
             // A concurrent instance may own this lock, so cleanup failure is harmless.
             try { File.Delete(lockPath); } catch (IOException) { }
         }
-        Console.WriteLine("\nDONE. Load this save using the original game executable.\n" +
+        Console.WriteLine("\nDONE. Start the game and load this save.\n" +
+            (wgs ? "Make a normal in-game save after checking the items. Xbox cloud persistence is not yet confirmed.\n" : "") +
             "Other save sets were not changed. You can run this patcher again after saving.");
     }
-
-    static void Commit(string directory, Dictionary<string, byte[]> originals, Dictionary<string, byte[]> changes)
+    static void Commit(string directory, Dictionary<string, string> filePaths,
+        Dictionary<string, byte[]> originals, Dictionary<string, byte[]> changes,
+        Dictionary<string, byte[]> metadataSnapshots)
     {
+        RequireMetadataUnchanged(directory, metadataSnapshots);
         string backup = System.IO.Path.Combine(directory, "CosmeticSaveBackup-" + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss") + "-" + Guid.NewGuid().ToString("N").Substring(0, 8));
         Directory.CreateDirectory(backup);
         Console.WriteLine("Backup: " + backup);
-        var log = new StringBuilder("Cosmetic Save Patcher " + Version + "\r\n\r\nClose the game, then copy the four save files from this backup folder\r\nback into the parent folder to undo this patch.\r\n\r\n");
+        var log = new StringBuilder("Cosmetic Save Patcher " + Version + "\r\n\r\nClose the game before restoring files from this backup.\r\nBackup paths mirror the original save-folder layout, including WGS GUID folders.\r\n\r\n");
         foreach (var file in originals)
         {
-            WriteNew(System.IO.Path.Combine(backup, System.IO.Path.GetFileName(file.Key)), file.Value);
-            log.AppendLine(System.IO.Path.GetFileName(file.Key) + " original SHA256 " + Hash(file.Value));
+            string relativePath = RelativeSavePath(directory, filePaths[file.Key]);
+            string backupPath = System.IO.Path.Combine(backup, relativePath);
+            string backupDirectory = System.IO.Path.GetDirectoryName(backupPath);
+            if (!string.IsNullOrEmpty(backupDirectory)) Directory.CreateDirectory(backupDirectory);
+            WriteNew(backupPath, file.Value);
+            log.AppendLine(file.Key + " -> " + relativePath + " original SHA256 " + Hash(file.Value));
         }
-        foreach (var file in changes) log.AppendLine(System.IO.Path.GetFileName(file.Key) + " patched SHA256  " + Hash(file.Value));
+        foreach (var file in changes) log.AppendLine(file.Key + " patched SHA256  " + Hash(file.Value));
         string logPath = System.IO.Path.Combine(backup, "RESTORE.txt");
         File.WriteAllText(logPath, log.ToString(), Encoding.UTF8);
-        var staged = new Dictionary<string, string>();
+        var staged = new Dictionary<string, string>(StringComparer.Ordinal);
         var committed = new List<string>();
         try
         {
             foreach (var file in changes)
             {
-                string temp = System.IO.Path.Combine(directory, ".cosmetic-" + Guid.NewGuid().ToString("N") + ".tmp");
+                string target = filePaths[file.Key];
+                RequireSafeSavePath(directory, target);
+                string targetDirectory = System.IO.Path.GetDirectoryName(target);
+                Require(!string.IsNullOrEmpty(targetDirectory), "Could not resolve save directory for " + file.Key + ".");
+                string temp = System.IO.Path.Combine(targetDirectory, ".cosmetic-" + Guid.NewGuid().ToString("N") + ".tmp");
                 staged.Add(file.Key, temp);
                 WriteNew(temp, file.Value);
             }
             CheckGameClosed();
+            RequireMetadataUnchanged(directory, metadataSnapshots);
             foreach (var file in originals)
-                Require(Read(file.Key).SequenceEqual(file.Value), "A save changed during patching. No patch was installed; close the game and retry.");
-            foreach (var file in changes)
             {
-                File.Replace(staged[file.Key], file.Key, null);
+                RequireSafeSavePath(directory, filePaths[file.Key]);
+                Require(Read(filePaths[file.Key]).SequenceEqual(file.Value), "A save changed during patching. No patch was installed; close the game and retry.");
+            }
+            foreach (var file in changes.OrderBy(file => file.Key == "containers.index" ? 2
+                : file.Key.EndsWith("-persi-global", StringComparison.Ordinal) ? 0 : 1))
+            {
+                RequireSafeSavePath(directory, filePaths[file.Key]);
+                File.Replace(staged[file.Key], filePaths[file.Key], null);
                 committed.Add(file.Key);
             }
             File.AppendAllText(logPath, "\r\nStatus: completed.\r\n");
@@ -390,15 +691,17 @@ internal static class Program
         catch (Exception failure)
         {
             bool restored = true;
-            foreach (string path in committed.AsEnumerable().Reverse())
+            foreach (string name in committed.AsEnumerable().Reverse())
             {
-                string temp = System.IO.Path.Combine(directory, ".cosmetic-rollback-" + Guid.NewGuid().ToString("N") + ".tmp");
-                try { WriteNew(temp, originals[path]); File.Replace(temp, path, null); }
+                string target = filePaths[name];
+                string targetDirectory = System.IO.Path.GetDirectoryName(target);
+                string temp = System.IO.Path.Combine(targetDirectory, ".cosmetic-rollback-" + Guid.NewGuid().ToString("N") + ".tmp");
+                try { RequireSafeSavePath(directory, target); WriteNew(temp, originals[name]); File.Replace(temp, target, null); }
                 catch { restored = false; }
                 finally { try { if (File.Exists(temp)) File.Delete(temp); } catch (IOException) { } }
             }
             throw new IOException("Could not finish patching: " + failure.Message + "\n" +
-                (restored ? "Original save files were retained or restored." : "Restore all four save files from the backup before playing.") +
+                (restored ? "Original save files were retained or restored." : "Restore every backed-up path, including WGS metadata, before playing.") +
                 "\nBackup: " + backup, failure);
         }
         finally

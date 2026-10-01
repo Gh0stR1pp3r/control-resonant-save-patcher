@@ -1,9 +1,14 @@
-COSMETIC SAVE PATCHER 1.2.0
+COSMETIC SAVE PATCHER 1.3.0 SOURCE
 
 Restores 13 cosmetics and the Pickpocket's Tool charm. Adds six promotional
 cosmetics to the eight item flags supported by 1.1.0. Windows v1.2.0 was
 tested and confirmed working on the current game version by the repository
 owner on September 27, 2026. A Linux user reported successful execution (issue #2).
+
+WGS support is in the v1.3.0 source on main. The published v1.2.0 downloads
+support flat saves; a WGS release binary has not been published yet.
+The earlier Windows/Linux confirmations do not establish WGS compatibility.
+Xbox WGS file support contributed by hdfyeg35: https://github.com/hdfyeg35
 
 INCLUDED ITEMS
 
@@ -53,6 +58,25 @@ WINDOWS
 The EXE is standalone: copy only CosmeticSavePatcher.exe to the save folder.
 No Python, installer, internet connection or administrator access is needed.
 It uses the .NET Framework provided with Windows 10/11.
+
+WINDOWS: XBOX APP / MICROSOFT STORE WGS (v1.3.0 SOURCE BUILD)
+
+1. Close the game and wait for synchronization to finish. Keep a full copy
+   of your WGS account folder before first use.
+2. Under %LOCALAPPDATA%\Packages\ find the game package folder beginning
+   with Remedy.CONTROLResonant_, then open SystemAppData\wgs\ and the
+   account folder containing containers.index.
+3. Put the built CosmeticSavePatcher.exe beside containers.index.
+4. Run .\CosmeticSavePatcher.exe --check, review the chosen save, then run
+   normally to patch it. The newest header must have all four files.
+5. Check the items in game and make a normal save. In-game behavior and
+   cloud persistence are not yet confirmed for this integration.
+
+The patcher follows indexed GUID paths. It checks the complete index and
+mapping snapshots before writing, and rejects linked parent directories,
+duplicate mappings, and entries where both different GUID files exist.
+It updates only the selected indexed byte total when blob sizes change.
+WGS index version 14 and container metadata version 4 are supported.
 
 LINUX X64
 1. Close the game completely.
@@ -107,8 +131,9 @@ must have the same prefix and end in:
   -bundle-container
 Keep all four together. The program uses the date inside each header,
 not the filename number or filesystem modification date. It patches only
-the newest set in the same folder as the patcher, even when multiple save
-slots are present. It does not search subfolders. For a particular save,
+the newest set: flat files beside the patcher, or WGS blobs in indexed
+folders. It stops if the newest set is incomplete or timestamps are tied.
+Keep the full WGS account-folder structure intact. For a particular flat save,
 put just its four files and the patcher into a separate folder. After
 patching that copy, copy all four save files back into the original save
 folder before starting the game.
@@ -126,10 +151,15 @@ Preferences, other save sets, and the game executable are not edited.
 Running it again on an already patched save makes no further changes.
 
 Backups
-Before editing, it copies all four files into a new CosmeticSaveBackup-...
-folder beside the patcher. To undo: close the game and copy those four backup
-files back into the save folder, replacing the patched copies.
-RESTORE.txt in each backup lists the original and patched file hashes.
+Before editing, it copies the four selected files into CosmeticSaveBackup-...
+beside the patcher. WGS backups also contain containers.index and the selected
+container.N, even if no metadata edit is needed. Paths mirror the GUID folders.
+RESTORE.txt records names, paths and original/patched hashes.
+
+To undo, close the game and restore EVERY backed-up path, including metadata.
+Restore before making further saves or allowing synchronization to advance the
+WGS store. Use your full account-folder copy if later store changes make the
+partial backup incompatible with other containers.
 
 Checking without changing anything
 Windows PowerShell:
@@ -141,6 +171,8 @@ For terminal automation, add --no-pause. Use --help for a short summary.
 Supported saves
 Built for the supplied Control Resonant save format: RMDB 2/2, header 16,
 global 23, world facts 4, and the known nine-slot outfit container.
+WGS additionally validates metadata and indexed byte totals; shared source
+builds for both platforms, with Xbox app WGS usage intended for Windows.
 It stops on bad checksums, unsupported layouts, incomplete newest sets,
 or tied newest timestamps. It does not guess new layouts after an update.
 Unknown header files ending in -header also cause it to stop.
@@ -150,7 +182,7 @@ six added promotional cosmetics. The analyzed game executable version is
 0.563.737.9. Item names and entitlement IDs come from the installed databases.
 Future game updates may change compatibility.
 
-Upgrading from 1.0.0 or 1.1.0
+Upgrading from an earlier source build
 Replace the old patcher with this version for your OS and run beside saves.
 Previously supported unlocks are retained. If all 14 flags are already
 enabled and the ten associated entitlement entries are absent, the

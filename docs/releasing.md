@@ -79,3 +79,7 @@ The released tag's automatic source archives remain a snapshot of that tag; `mai
 ## Repository boundaries
 
 Source, build files, project documentation, and runtime notices belong in the repository. Executables belong in release assets. Personal saves, game binaries, extracted archives, analysis dumps containing private data, access tokens, and publication journals do not belong in either public location.
+
+## WGS source status
+
+Version 1.3.0 source contains WGS support contributed by [hdfyeg35](https://github.com/hdfyeg35), with integration fixes. This source merge does not replace the v1.2.0 release assets. Keep source and published-release status distinct; WGS in-game and cloud validation remains outstanding. Preserve contributor credit in release notes when distributing WGS support.
