@@ -1,10 +1,10 @@
 # Xbox WGS support
 
-Source version 1.3.0, integrated October 1, 2026. Xbox WGS file support was contributed by [hdfyeg35](https://github.com/hdfyeg35) in [commit 2de2299](https://github.com/hdfyeg35/control-resonant-save-patcher/commit/2de2299b72fab471d8f67988c1dc7702422a03b4). The integration keeps the existing 14 rewards and RMDB payload edits, with additional storage-safety checks.
+Version 1.3.0, integrated October 1, 2026. Xbox WGS file support was contributed by [hdfyeg35](https://github.com/hdfyeg35) in [commit 2de2299](https://github.com/hdfyeg35/control-resonant-save-patcher/commit/2de2299b72fab471d8f67988c1dc7702422a03b4). The integration keeps the existing 14 rewards and RMDB payload edits, with additional storage-safety checks.
 
 ## Discovery
 
-Place the built patcher in the per-account WGS folder beside `containers.index`. The Xbox app package is under `%LOCALAPPDATA%\Packages\Remedy.CONTROLResonant_*\SystemAppData\wgs\`. Use the actual installed package name and account directory.
+Place the patcher in the per-account WGS folder beside `containers.index`. The Xbox app package is under `%LOCALAPPDATA%\Packages\Remedy.CONTROLResonant_*\SystemAppData\wgs\`. Use the actual installed package name and account directory.
 
 The presence of `containers.index` selects WGS discovery. Otherwise the patcher uses flat filenames beside its executable. WGS discovery follows only indexed paths. Shared source can parse copied WGS data on supported file systems, but the documented Xbox app workflow is for Windows; Linux cloud functionality is not established.
 
@@ -35,4 +35,4 @@ The backup is not a full account-store snapshot. Restore it before advancing the
 
 This merge has not been confirmed in game or across Xbox cloud upload/download. Earlier Windows and Linux v1.2.0 reports apply to flat saves. Compilation is not runtime confirmation. When the user requests testing, cover absent and false facts, zero and nonzero size deltas, metadata changes, linked GUID directories, ambiguous GUID entries, incomplete saves, rollback, and an in-game save/reload/cloud cycle.
 
-The public stable downloads remain v1.2.0 until a separate release is authorized and published. The source merge preserves the contributor's commit in history and credits their WGS work in both README formats.
+The v1.3.0 release includes Windows and Linux builds. Both compiled successfully; runtime and cloud confirmation remains outstanding. The source merge preserves the contributor's commit in history and credits their WGS work in both README formats.

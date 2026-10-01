@@ -2,20 +2,20 @@
 
 ![Control Resonant](https://exputer.com/wp-content/uploads/2026/08/control-resonant.jpg)
 
-A Windows and Linux x64 utility for restoring unobtainable outfits/items in supported Control Resonant saves. Source version **1.3.0** restores **13 cosmetics plus the Pickpocket's Tool charm** and removes their associated applied-entitlement entries.
+A Windows and Linux x64 utility for restoring unobtainable outfits/items in supported Control Resonant saves. Version **1.3.0** restores **13 cosmetics plus the Pickpocket's Tool charm** and removes their associated applied-entitlement entries.
 
 **Version 1.2.0 was tested and confirmed working on Windows with the current game version by the repository owner on September 27, 2026.**
 
-**The Linux version was also tested by the user who opened [issue #2](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/2), who reported that the patcher ran successfully.**
+**The Linux v1.2.0 version was also tested by the user who opened [issue #2](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/2), who reported that the patcher ran successfully.**
 
 ## Downloads
 
-The downloads below are the stable **v1.2.0** release for flat Steam saves. **Xbox WGS support is available in the v1.3.0 source on main; no WGS release binary has been published yet.** The earlier Windows/Linux confirmations apply to v1.2.0. The integrated WGS code has not yet been confirmed in game or through Xbox cloud synchronization.
+The downloads below are **v1.3.0**, available for Windows and Linux x64. The Windows build adds Xbox app / Microsoft Store WGS support. Both builds compiled successfully; v1.3.0 has not yet been runtime-tested. The earlier Windows/Linux confirmations apply to v1.2.0. WGS in-game behavior and Xbox cloud synchronization remain unconfirmed.
 
 - **[Windows: CosmeticSavePatcher.exe](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/latest/download/CosmeticSavePatcher.exe)**
 - **[Linux x64: CosmeticSavePatcher-linux-x64](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/latest/download/CosmeticSavePatcher-linux-x64)** — includes .NET; no separate .NET installation or Wine needed. A Linux user reported successful execution in [issue #2](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/2).
 
-## New in 1.3.0 source
+## New in 1.3.0
 
 - Adds Xbox app / Microsoft Store WGS file support, contributed by [hdfyeg35](https://github.com/hdfyeg35).
 - Resolves logical save names through `containers.index` and `container.N`, retaining the existing 14-item patch logic.
@@ -66,11 +66,11 @@ Only the EXE is needed. No Python, installer, internet connection, or administra
 
 ### Windows: Xbox app / Microsoft Store WGS
 
-Requires a build of the v1.3.0 source. Close the game and let any ongoing synchronization finish. Keep a full copy of the WGS account folder before first use.
+Use the v1.3.0 Windows download above. Close the game and let any ongoing synchronization finish. Keep a full copy of the WGS account folder before first use.
 
 1. Open `%LOCALAPPDATA%\Packages\` and find the game's package folder beginning with `Remedy.CONTROLResonant_`.
 2. Open its `SystemAppData\wgs\` directory, then the account folder containing `containers.index`.
-3. Put the built `CosmeticSavePatcher.exe` directly beside `containers.index`.
+3. Put `CosmeticSavePatcher.exe` directly beside `containers.index`.
 4. Run `.\CosmeticSavePatcher.exe --check` to inspect the selected save, then run it normally to apply the patch.
 5. Start the game and check the items. Make a normal in-game save. Cloud persistence has not yet been confirmed for this integration.
 

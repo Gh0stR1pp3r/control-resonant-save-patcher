@@ -1,13 +1,14 @@
-COSMETIC SAVE PATCHER 1.3.0 SOURCE
+COSMETIC SAVE PATCHER 1.3.0
 
-Restores 13 cosmetics and the Pickpocket's Tool charm. Adds six promotional
-cosmetics to the eight item flags supported by 1.1.0. Windows v1.2.0 was
+Restores 13 cosmetics and the Pickpocket's Tool charm. Version 1.3.0 adds
+Xbox app / Microsoft Store WGS file support. Windows v1.2.0 was
 tested and confirmed working on the current game version by the repository
 owner on September 27, 2026. A Linux user reported successful execution (issue #2).
 
-WGS support is in the v1.3.0 source on main. The published v1.2.0 downloads
-support flat saves; a WGS release binary has not been published yet.
-The earlier Windows/Linux confirmations do not establish WGS compatibility.
+Version 1.3.0 downloads are available for Windows and Linux x64. Both
+builds compiled successfully; v1.3.0 has not yet been runtime-tested.
+Earlier Windows/Linux confirmations apply to v1.2.0. WGS in-game behavior
+and Xbox cloud synchronization remain unconfirmed.
 Xbox WGS file support contributed by hdfyeg35: https://github.com/hdfyeg35
 
 INCLUDED ITEMS
@@ -59,14 +60,14 @@ The EXE is standalone: copy only CosmeticSavePatcher.exe to the save folder.
 No Python, installer, internet connection or administrator access is needed.
 It uses the .NET Framework provided with Windows 10/11.
 
-WINDOWS: XBOX APP / MICROSOFT STORE WGS (v1.3.0 SOURCE BUILD)
+WINDOWS: XBOX APP / MICROSOFT STORE WGS (v1.3.0)
 
 1. Close the game and wait for synchronization to finish. Keep a full copy
    of your WGS account folder before first use.
 2. Under %LOCALAPPDATA%\Packages\ find the game package folder beginning
    with Remedy.CONTROLResonant_, then open SystemAppData\wgs\ and the
    account folder containing containers.index.
-3. Put the built CosmeticSavePatcher.exe beside containers.index.
+3. Put CosmeticSavePatcher.exe beside containers.index.
 4. Run .\CosmeticSavePatcher.exe --check, review the chosen save, then run
    normally to patch it. The newest header must have all four files.
 5. Check the items in game and make a normal save. In-game behavior and
@@ -182,7 +183,7 @@ six added promotional cosmetics. The analyzed game executable version is
 0.563.737.9. Item names and entitlement IDs come from the installed databases.
 Future game updates may change compatibility.
 
-Upgrading from an earlier source build
+Upgrading from an earlier version
 Replace the old patcher with this version for your OS and run beside saves.
 Previously supported unlocks are retained. If all 14 flags are already
 enabled and the ten associated entitlement entries are absent, the

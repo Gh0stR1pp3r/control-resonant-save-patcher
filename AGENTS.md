@@ -1,6 +1,6 @@
 # Working on Control Resonant Save Patcher
 
-This repository contains a small save editor for Control Resonant. Read this file before changing the implementation. Source is v1.3.0 with integrated WGS support (October 1, 2026); the published stable binary baseline is v1.2.0; inspect the current source and release before assuming that baseline is still current.
+This repository contains a small save editor for Control Resonant. Read this file before changing the implementation. The release baseline is v1.3.0 with integrated WGS support (October 1, 2026). Both platforms compiled successfully; v1.3.0 runtime behavior and WGS cloud persistence remain unconfirmed. Inspect the current source and release before assuming that baseline is still current.
 
 ## Start here
 

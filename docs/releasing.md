@@ -2,7 +2,7 @@
 
 Repository: [Gh0stR1pp3r/control-resonant-save-patcher](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher).
 
-The documented baseline is [v1.2.0](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/tag/v1.2.0). Inspect the current branch, tags, release, and task instructions before publishing. Local scripts used by the original maintainer are not part of this repository and should not be assumed available to a future agent.
+The documented baseline is [v1.3.0](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/tag/v1.3.0). Inspect the current branch, tags, release, and task instructions before publishing. Local scripts used by the original maintainer are not part of this repository and should not be assumed available to a future agent.
 
 ## Build
 
@@ -80,6 +80,13 @@ The released tag's automatic source archives remain a snapshot of that tag; `mai
 
 Source, build files, project documentation, and runtime notices belong in the repository. Executables belong in release assets. Personal saves, game binaries, extracted archives, analysis dumps containing private data, access tokens, and publication journals do not belong in either public location.
 
-## WGS source status
+## WGS release status
 
-Version 1.3.0 source contains WGS support contributed by [hdfyeg35](https://github.com/hdfyeg35), with integration fixes. This source merge does not replace the v1.2.0 release assets. Keep source and published-release status distinct; WGS in-game and cloud validation remains outstanding. Preserve contributor credit in release notes when distributing WGS support.
+Version 1.3.0 includes Windows and Linux executables with WGS support contributed by [hdfyeg35](https://github.com/hdfyeg35), with integration fixes. Both builds compiled successfully; v1.3.0 runtime testing and WGS in-game/cloud validation remain outstanding. Preserve contributor credit and distinguish the earlier v1.2.0 confirmations from the new release.
+
+Published v1.3.0 executable SHA-256 values:
+
+```text
+ac96b88578623c2d11e0d3681f0de13bf51f273ea132dd24e1126788e14ee4db  CosmeticSavePatcher.exe
+9d43c64f78698e50cfaf42222bb554d619e8437bd09dcf445378352f3773089d  CosmeticSavePatcher-linux-x64
+```
