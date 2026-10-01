@@ -1,6 +1,6 @@
 # Save format and patch boundaries
 
-Baseline: v1.4.0; the RMDB payload logic is retained from v1.2.0. See [WGS support](wgs-support.md) for storage metadata and backups. This is a partial decoder for the observed layout, not a general specification of every Control Resonant save version. All offsets below are decimal byte offsets from the start of a file unless stated otherwise. Serialized numbers use little-endian byte order.
+Baseline: v1.4.1; the RMDB payload logic is retained from v1.2.0. See [WGS support](wgs-support.md) for storage metadata and backups. This is a partial decoder for the observed layout, not a general specification of every Control Resonant save version. All offsets below are decimal byte offsets from the start of a file unless stated otherwise. Serialized numbers use little-endian byte order.
 
 ## Save selection and files
 
@@ -43,7 +43,7 @@ CRC uses reflected polynomial `0xEDB88320`, initial value `0xFFFFFFFF`, and fina
 
 The timestamp must be positive and representable through year 9999. The parser limits `L` to 1 MiB and `E` to 10,000, rejects duplicate entitlement IDs, and checks bounds. Preserve the order of retained entitlement entries.
 
-The applied list records which rewards the game has applied. It is not a platform ownership cache. The patcher removes only the ten IDs below when present, updates the count, and recalculates CRC. It does not edit preferences or platform/account ownership.
+The applied list records which rewards the game has applied. It is not a platform ownership cache. Version 1.4.1 removes only the eleven IDs below when present, updates the count, and recalculates CRC. It does not edit preferences or platform/account ownership.
 
 ## Global version 23 / world facts version 4
 
@@ -61,7 +61,7 @@ Boolean keys must be unique and strictly increasing; values must be 0 or 1. Set 
 
 ### Supported unlock facts
 
-`PreorderUnlockFacts` contains six entries; `ExtraUnlockFacts` contains eight. The total is **13 cosmetic flags plus one charm flag**.
+In v1.4.1, `PreorderUnlockFacts` contains six entries; `ExtraUnlockFacts` contains nine. The total is **14 cosmetic flags plus one charm flag**. The serialized-layout baseline remains v1.4.0; no new save versions are accepted by this change.
 
 | Item | uint64 flag ID | Grant source in game data |
 | --- | --- | --- |
@@ -79,6 +79,7 @@ Boolean keys must be unique and strictly increasing; values must be 0 or 1. Set 
 | Sierra Vest | `0xBF6BE35893F7D586` | Twitch drop 2 |
 | Sierra Suit | `0xEF6FBC7BA02AB697` | Twitch drop 1 |
 | MIO Specialist's Robe | `0xF37DC383C5C5E132` | China promotion |
+| Deathadder Jacket | `0x3EE727291BFE7B2B` | Razer entitlement |
 
 ### Applied-entitlement IDs to remove
 
@@ -96,6 +97,7 @@ These are serialized uint32 item IDs read from the entitlement database. Do not 
 | Twitch drop 2 | `0x4FFAD0C3` | `rmd_entitlement_twitch_2` |
 | Twitch drop 3 | `0x4EFACF30` | `rmd_entitlement_twitch_3` |
 | China promotion | `0xECA4A890` | `china` |
+| Razer | `0x48A1D491` | `rmd_entitlement_razer` |
 
 Observed revocation behavior motivated removing the applied markers while restoring the unlock facts. This approach was confirmed for the supplied saves; future game logic can change it.
 

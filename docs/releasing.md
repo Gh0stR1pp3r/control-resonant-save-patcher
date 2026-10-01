@@ -2,7 +2,20 @@
 
 Repository: [Gh0stR1pp3r/control-resonant-save-patcher](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher).
 
-The documented baseline is [v1.4.0](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/tag/v1.4.0). Inspect the current branch, tags, release, and task instructions before publishing. Local scripts used by the original maintainer are not part of this repository and should not be assumed available to a future agent.
+The documented baseline is [v1.4.1](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/tag/v1.4.1). Inspect the current branch, tags, release, and task instructions before publishing. Local scripts used by the original maintainer are not part of this repository and should not be assumed available to a future agent.
+
+## v1.4.1 release status
+
+Version 1.4.1 adds Deathadder Jacket (Razer): world-fact key `0x3EE727291BFE7B2B` and applied-entitlement item ID `0x48A1D491`. It retains whole-save backups and Steam/Epic/WGS storage handling. The repository owner tested the exact Windows release artifact and reported that it works as expected on October 1, 2026, using game file version `0.564.208.5`. No independent post-test save inspection was performed. Linux v1.4.1 compiled successfully; execution, Epic/WGS in-game behavior and cloud persistence remain unconfirmed.
+
+The Windows executable retains full product/company metadata and remains unsigned. This release is not an established fix for reported map delay or launch failures. Preserve the tested Windows hash when publishing; do not silently replace it with a rebuild.
+
+Published executable SHA-256 values:
+
+```text
+4296a85ff974583f27a40f247c1ecc843d5bd43712656467067a3c72e2dca4ad  CosmeticSavePatcher.exe
+6a785a1d9416fbd45ab7f16212c9e28388de053ca7d68403809cd8e94fb22b48  CosmeticSavePatcher-linux-x64
+```
 
 ## Build
 

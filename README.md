@@ -2,18 +2,27 @@
 
 ![Control Resonant](https://exputer.com/wp-content/uploads/2026/08/control-resonant.jpg)
 
-A Windows and Linux x64 utility for restoring unobtainable outfits/items in supported Control Resonant saves. Version **1.4.0** restores **13 cosmetics plus the Pickpocket's Tool charm** and removes their associated applied-entitlement entries.
+A Windows and Linux x64 utility for restoring unobtainable outfits/items in supported Control Resonant saves. Version **1.4.1** restores **14 cosmetics plus the Pickpocket's Tool charm** and removes their associated applied-entitlement entries.
 
-**Version 1.2.0 was tested and confirmed working on Windows with the current game version by the repository owner on September 27, 2026.**
+**Windows v1.4.1 was tested by the repository owner, who confirmed it works as expected on October 1, 2026, using game file version `0.564.208.5`.** It adds Deathadder Jacket (Razer).
+
+**Version 1.2.0 was tested and confirmed working on Windows with the then-current game version by the repository owner on September 27, 2026.**
 
 **The Linux v1.2.0 version was also tested by the user who opened [issue #2](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/2), who reported that the patcher ran successfully.**
 
 ## Downloads
 
-The downloads below are **v1.4.0**, available for Windows and Linux x64, with Steam, Epic `.chunk`, and Xbox app / Microsoft Store WGS save support. Both builds compiled successfully. A user-run Windows/Steam v1.4.0 result was inspected: the expected header cleanup succeeded and all 70 original save/preferences files were backed up exactly. All 14 supported unlocks were already enabled in that snapshot; this does not establish a fresh unlock test. Epic and WGS in-game behavior, cloud persistence, and Linux v1.4.0 execution remain unconfirmed.
+The downloads below are **v1.4.1**, available for Windows and Linux x64, with Steam, Epic `.chunk`, and Xbox app / Microsoft Store WGS save support. The Windows download is the exact build tested by the repository owner. Linux v1.4.1 compiled successfully; its execution, Epic/WGS in-game behavior, and cloud persistence remain unconfirmed.
 
 - **[Windows: CosmeticSavePatcher.exe](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/latest/download/CosmeticSavePatcher.exe)**
 - **[Linux x64: CosmeticSavePatcher-linux-x64](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/latest/download/CosmeticSavePatcher-linux-x64)** — includes .NET; no separate .NET installation or Wine needed. A Linux user reported successful execution in [issue #2](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/2).
+
+## New in 1.4.1
+
+- Adds Deathadder Jacket, world-fact key `0x3EE727291BFE7B2B`, and cleanup of its applied-entitlement item ID `0x48A1D491`.
+- Retains Steam, Epic `.chunk`, Xbox WGS support and whole-save backups.
+- Includes full product, description, company and copyright metadata. The Windows executable remains unsigned.
+- This addition is based on current installed game databases; it is not a demonstrated fix for reported map delay or launch failures.
 
 ## New in 1.4.0
 
@@ -51,6 +60,7 @@ To upgrade, replace the patcher with the new build for your operating system and
 | Sierra Vest | `0xBF6BE35893F7D586` | Twitch drop 2 |
 | Sierra Suit | `0xEF6FBC7BA02AB697` | Twitch drop 1 |
 | MIO Specialist's Robe | `0xF37DC383C5C5E132` | China promotion |
+| Deathadder Jacket | `0x3EE727291BFE7B2B` | Razer entitlement |
 | Third Ice Baseball Cap | `0x5388457983503C2E` | NVIDIA promotion |
 | Cracked Standard Issue Sunglasses | `0x747AFDEFDBABB85B` | Beta tester reward |
 | Threshold Bureau Coat | `0x2859E4A7F3D0F7FB` | PS5 preorder |
@@ -75,7 +85,7 @@ Only the EXE is needed. No Python, installer, internet connection, or administra
 
 ### Windows: Xbox app / Microsoft Store WGS
 
-Use the v1.4.0 Windows download above. Close the game and let any ongoing synchronization finish. Keep a full copy of the WGS account folder before first use.
+Use the v1.4.1 Windows download above. Close the game and let any ongoing synchronization finish. Keep a full copy of the WGS account folder before first use.
 
 1. Open `%LOCALAPPDATA%\Packages\` and find the game's package folder beginning with `Remedy.CONTROLResonant_`.
 2. Open its `SystemAppData\wgs\` directory, then the account folder containing `containers.index`.
@@ -89,7 +99,7 @@ WGS discovery follows only the folders and blobs referenced by the index. It is 
 
 1. Close the game and let any ongoing cloud synchronization finish.
 2. Open the save folder containing matching `-header.chunk`, `-persi-global.chunk`, `-player.chunk`, and `-bundle-container.chunk` files. Use the folder containing the actual files, rather than a parent folder.
-3. Put the v1.4.0 patcher for your operating system beside those files. Keep the `.chunk` extensions and the existing `--containerDisplayName.chunk` file.
+3. Put the v1.4.1 patcher for your operating system beside those files. Keep the `.chunk` extensions and the existing `--containerDisplayName.chunk` file.
 4. On Windows, double-click `CosmeticSavePatcher.exe`. On Linux, use the terminal commands in the Linux section below.
 5. Read the result, then load the save in game. The newest set is chosen using the timestamp inside its header; all four matching files must be present.
 
@@ -158,7 +168,7 @@ For WGS, these are logical filenames mapped by the index to GUID blobs. Keep the
 
 ## Backups and undo
 
-In v1.4.0, before editing, the program creates a `CosmeticSaveBackup-...` folder containing:
+From v1.4.0 onward, before editing, the program creates a `CosmeticSaveBackup-...` folder containing:
 
 - **Steam:** every save set in the current folder, all `preferences_*` files, and `steam_autocloud.vdf` / `remotecache.vdf` if present.
 - **Epic:** every `.chunk` file in the current folder, including `--containerDisplayName.chunk`, plus any preferences and recognized Steam save files there.
@@ -172,8 +182,8 @@ To undo, close the game and let cloud synchronization finish. Restore **all file
 
 ## What changes
 
-- Restores the 14 item flags listed above (13 cosmetics and one charm), including flags missing from the save.
-- Removes matching applied-entitlement entries for PC preorder, PS5 preorder, NVIDIA, beta testers, both mailing promotions, all three Twitch drops, and the China promotion.
+- Restores the 15 item flags listed above (14 cosmetics and one charm), including flags missing from the save.
+- Removes matching applied-entitlement entries for PC preorder, PS5 preorder, NVIDIA, beta testers, both mailing promotions, all three Twitch drops, the China promotion, and Razer.
 - Restores the two observed fallback outfit selections only when preorder flags were lost and those specific fallback values are present. Adding promotional flags alone does not change your equipped outfit.
 - Recalculates the affected CRC32 checksums.
 - For WGS, updates the selected container byte total in `containers.index` only if the changed blobs have a different combined size. It preserves the GUID mapping and sync fields.
@@ -182,7 +192,7 @@ Other outfit choices, preferences, other save sets, and the game executable are 
 
 ## Why entitlement entries can return
 
-`Entitlement entries to remove` counts applied-grant markers, not new items to unlock. Removing a marker is intended to avoid the analyzed revocation path when the game does not recognize its entitlement. Version 1.4.0 removes matching markers without checking live account ownership.
+`Entitlement entries to remove` counts applied-grant markers, not new items to unlock. Removing a marker is intended to avoid the analyzed revocation path when the game does not recognize its entitlement. Version 1.4.1 removes matching markers without checking live account ownership.
 
 If the game recognizes a grant, it may add its marker again on the next load/save. Running the patcher can then remove that marker again and create another backup even though all supported cosmetics are already enabled. The owner observed seven markers returning in this way; the supplied before/after files showed only a header edit and no cosmetic changes. There is no demonstrated benefit from repeatedly removing those seven markers while those grants remain recognized. You do not need to rerun the patcher after every session if the desired items are still available.
 
@@ -206,9 +216,9 @@ Use `--no-pause` for terminal automation or `--help` for a short summary.
 
 Supports the analyzed save layout: RMDB 2/2, header version 16, global version 23, world facts version 4, and the known nine-slot outfit container. The program stops on invalid checksums, unsupported layouts, incomplete newest sets, ambiguous newest dates, or unrecognized files ending in `-header` or `-header.chunk`. Some early checkpoints may lack the required nine-slot outfit container; those are rejected if selected.
 
-**Windows v1.2.0 was tested and confirmed working on the current game version by the repository owner on September 27, 2026**, including the expanded promotional rewards. The analyzed executable version is `0.563.737.9`. Future game updates may change the format or ownership behavior.
+**Windows v1.4.1 was tested by the repository owner and confirmed working on October 1, 2026**, following the Deathadder Jacket addition for game file version `0.564.208.5`. This is a user-reported result; no independent post-test save inspection was performed. Earlier Windows v1.2.0 testing covered the expanded promotional rewards on game version `0.563.737.9`. Future game updates may change the format or ownership behavior.
 
-The Linux x64 build uses the same patching logic. A Linux user reported that it ran successfully in [issue #2](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/2). The report does not specify a distribution or confirm Steam Deck compatibility or in-game results.
+The Linux x64 build uses the same patching logic. A Linux user reported that v1.2.0 ran successfully in [issue #2](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/2). The report does not specify a distribution or confirm Steam Deck compatibility or in-game results.
 
 The WGS storage reader accepts index version 14 and container metadata version 4. Unavailable referenced containers, ambiguous mappings, linked directories, and changing metadata cause it to stop. Shared source builds on Windows and Linux; the Xbox app WGS workflow is intended for Windows and is not a claim of Xbox cloud support on Linux.
 

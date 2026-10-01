@@ -1,8 +1,19 @@
-COSMETIC SAVE PATCHER 1.4.0
+CONTROL RESONANT SAVE PATCHER 1.4.1
 
-Restores 13 cosmetics and the Pickpocket's Tool charm. Version 1.4.0 adds
+Restores 14 cosmetics and the Pickpocket's Tool charm. Version 1.4.1 adds
+Deathadder Jacket (Razer), flag 0x3EE727291BFE7B2B, and cleanup of its
+applied-entitlement item ID 0x48A1D491. The repository owner tested the
+Windows build and confirmed it works as expected on October 1, 2026,
+using game file version 0.564.208.5. Linux v1.4.1 compiled successfully;
+its execution, Epic/WGS in-game behavior and cloud persistence remain
+unconfirmed. Reported map delay and launch failures have not been shown fixed.
+
+It retains whole-save backups and Steam, Epic and Xbox WGS support.
+The Windows EXE has full product/company metadata and remains unsigned.
+
+Previous release history: Version 1.4.0 adds
 Epic Games .chunk saves, retaining Steam and Xbox WGS file support. Windows v1.2.0 was
-tested and confirmed working on the current game version by the repository
+tested and confirmed working on the then-current game version by the repository
 owner on September 27, 2026. A Linux user reported successful execution (issue #2).
 
 Version 1.4.0 supports Steam, Epic .chunk and Xbox WGS saves. Both Windows
@@ -27,6 +38,8 @@ Sierra Suit - Twitch drop 1
   0xEF6FBC7BA02AB697
 MIO Specialist's Robe - China promotion
   0xF37DC383C5C5E132
+Deathadder Jacket - Razer entitlement
+  0x3EE727291BFE7B2B
 Third Ice Baseball Cap - NVIDIA promotion
   0x5388457983503C2E
 Cracked Standard Issue Sunglasses - Beta tester reward
@@ -159,10 +172,10 @@ folder before starting the game. Only files in the selected folder can be
 backed up; use the original save folder to include every save set.
 
 What does it change?
-It restores the 14 item flags listed above, including missing entries,
+It restores the 15 item flags listed above, including missing entries,
 and removes matching applied-entitlement markers for PC preorder, PS5
 preorder, NVIDIA, beta testers, both mailing promotions, all three Twitch
-drops, and the China promotion. It updates CRC32 checksums as needed.
+drops, the China promotion, and Razer. It updates CRC32 checksums as needed.
 If preorder flags were lost and the two known fallback outfit selections
 are found, it restores those selections too. Adding promotional flags
 alone does not change your equipped outfit. Equip the items yourself
@@ -172,7 +185,7 @@ Running it again makes no changes if supported flags remain enabled and
 matching applied-entitlement markers remain absent.
 
 Backups
-Before editing, this v1.4.0 build creates CosmeticSaveBackup-... beside
+Before editing, this v1.4.1 build creates CosmeticSaveBackup-... beside
 the patcher, containing ALL recognized save data in the selected folder:
 - Steam: all save sets, preferences_* files, and steam_autocloud.vdf /
   remotecache.vdf when present.
@@ -200,7 +213,7 @@ is confirmed. Cloud persistence remains unconfirmed.
 Why entitlement entries can return
 The entitlement-removal count describes applied-grant markers, not new
 cosmetics. Removing markers is intended to avoid revocation of rewards
-whose entitlement the game does not recognize. Version 1.4.0 removes
+whose entitlement the game does not recognize. Version 1.4.1 removes
 matching markers without checking live account ownership.
 The game can add recognized grants back on a later load/save. The patcher
 then removes them again and creates another backup, even when all supported
@@ -229,13 +242,13 @@ not supported if selected.
 The Windows 1.2.0 patcher was tested and confirmed working on the current
 game version by the repository owner on September 27, 2026, including the
 six added promotional cosmetics. The analyzed game executable version is
-0.563.737.9. Item names and entitlement IDs come from the installed databases.
+0.563.737.9; v1.4.1 was user-confirmed on 0.564.208.5. Item names and entitlement IDs come from the installed databases.
 Future game updates may change compatibility.
 
 Upgrading from an earlier version
 Replace the old patcher with this version for your OS and run beside saves.
-Previously supported unlocks are retained. If all 14 flags are already
-enabled and the ten associated entitlement entries are absent, the
+Previously supported unlocks are retained. If all 15 flags are already
+enabled and the eleven associated entitlement entries are absent, the
 program reports Already patched. Start the game, load the patched save,
 and equip items from the cosmetic menu.
 

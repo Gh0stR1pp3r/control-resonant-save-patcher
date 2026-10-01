@@ -15,7 +15,7 @@
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
-    <Version>1.4.0</Version>
+    <Version>1.4.1</Version>
     <NuGetAudit>false</NuGetAudit>
   </PropertyGroup>
   <ItemGroup>

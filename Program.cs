@@ -8,14 +8,18 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 
-[assembly: AssemblyTitle("Cosmetic Save Patcher")]
-[assembly: AssemblyVersion("1.4.0.0")]
-[assembly: AssemblyFileVersion("1.4.0.0")]
-[assembly: AssemblyInformationalVersion("1.4.0")]
+[assembly: AssemblyTitle("Control Resonant Save Patcher")]
+[assembly: AssemblyProduct("Control Resonant Save Patcher")]
+[assembly: AssemblyDescription("Restores supported outfits and items in Control Resonant Steam, Epic Games, and Xbox WGS saves, with automatic backups and checksum validation.")]
+[assembly: AssemblyCompany("Gh0stR1pp3r")]
+[assembly: AssemblyCopyright("Copyright (c) 2026 Gh0stR1pp3r and contributors")]
+[assembly: AssemblyVersion("1.4.1.0")]
+[assembly: AssemblyFileVersion("1.4.1.0")]
+[assembly: AssemblyInformationalVersion("1.4.1")]
 
 internal static class Program
 {
-    const string Version = "1.4.0";
+    const string Version = "1.4.1";
     // Xbox WGS storage support contributed by https://github.com/hdfyeg35.
     static readonly StringComparison PathComparison = System.IO.Path.DirectorySeparatorChar == '\\'
         ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
@@ -33,7 +37,8 @@ internal static class Program
         0x50FAD256, // Twitch drop 1
         0x4FFAD0C3, // Twitch drop 2
         0x4EFACF30, // Twitch drop 3
-        0xECA4A890  // China promotion
+        0xECA4A890, // China promotion
+        0x48A1D491  // Razer: Deathadder Jacket
     };
     const int MaxFileBytes = 64 * 1024 * 1024;
     static readonly ulong[] PreorderUnlockFacts = {
@@ -52,7 +57,8 @@ internal static class Program
         0xB961238CCE640F14UL, // Sierra Helmet
         0xBF6BE35893F7D586UL, // Sierra Vest
         0xEF6FBC7BA02AB697UL, // Sierra Suit
-        0xF37DC383C5C5E132UL  // MIO Specialist's Robe
+        0xF37DC383C5C5E132UL, // MIO Specialist's Robe
+        0x3EE727291BFE7B2BUL  // Deathadder Jacket (Razer)
     };
     static readonly uint[] SlotIds = {
         0x22331ABB, 0x26332107, 0x2733229A, 0x25331F74, 0x1B330FB6,
@@ -94,7 +100,7 @@ internal static class Program
         try
         {
             Console.WriteLine("COSMETIC SAVE PATCHER " + Version + "\n");
-            Console.WriteLine("13 cosmetics + Pickpocket's Tool charm: preorder and promotional rewards.\n");
+            Console.WriteLine("14 cosmetics + Pickpocket's Tool charm: unobtainable outfits/items.\n");
             if (args.Any(a => a != "--check" && a != "--no-pause" && a != "--help"))
                 throw new InvalidOperationException("Unknown option. Use --help for instructions.");
             if (args.Contains("--help"))
@@ -111,7 +117,7 @@ internal static class Program
                     "WGS containers are not rebuilt; only mapped blobs and required size metadata change.\n\n" +
                     "--check     Inspect only: do not patch or create backups.\n" +
                     "--no-pause  Exit without waiting for Enter.\n\n" +
-                    "Restores 14 item unlock flags and removes up to ten\n" +
+                    "Restores 15 item unlock flags and removes up to eleven\n" +
                     "associated applied-entitlement entries.\n" +
                     "Supports the supplied game's header version 16 and global version 23.\n" +
                     "Backups include all save sets and preferences in this folder,\n" +

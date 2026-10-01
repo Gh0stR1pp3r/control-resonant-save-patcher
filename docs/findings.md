@@ -2,10 +2,19 @@
 
 Recorded September 27, 2026, for patcher v1.2.0 and analyzed game executable version `0.563.737.9`. Treat these as findings for that build. Recheck compatibility after game updates.
 
+## v1.4.1 release (October 1, 2026)
+
+Current installed game data (EXE `0.564.208.5`, SHA-256 `a2e8e57c86ea60f12de1fa628f8db12014eb296fb259449ea688df9c7ba1497a`) maps category 14 / Remedy-service ID `0x8501EFDB` to `rmd_entitlement_razer`, item ID `0x48A1D491`. Its single granted fact, `wf_da208857baff7481`, hashes to `0x3EE727291BFE7B2B`; the outfit record `dylan_top_razerjacket` uses the same fact. English localization names the outfit **Deathadder Jacket** and its entitlement **Razer Jacket**. The serialized item ID and category are at decompressed entitlement-bundle offsets `0x2244` and `0x2248` in `0xea6067968c670742.bundle`.
+
+Version 1.4.1 adds this fact to `ExtraUnlockFacts` and its item ID to `EntitlementsToRemove`, following the existing promotional-reward path. There are now 14 cosmetics and one charm. The service ID is not written into the save. Full backups, save selection, layout checks, CRC handling and outfit fallback conditions remain as in v1.4.0. Full product/company metadata is retained; the Windows EXE remains unsigned.
+
+Static comparison found the inspected outfit status and entitlement grant/revoke/apply bodies unchanged apart from address relocation, including corresponding internal branches. This does not prove all save readers, dependencies or game data unchanged. The repository owner subsequently tested the Windows v1.4.1 build and explicitly reported that it "works as expected" on October 1, 2026. This is user-reported confirmation on game file version `0.564.208.5`; no independent post-test save inspection or extended persistence test was performed. Linux v1.4.1 compiled successfully but has not been run here. Epic/WGS in-game behavior and cloud persistence remain unconfirmed. The reported map-delay/launch problems are not established as fixed by this reward addition.
+
 ## What was confirmed
 
 | Finding | Evidence and limits |
 | --- | --- |
+| Windows v1.4.1 works as expected | Repository owner explicitly confirmed the Windows test build after the Deathadder Jacket addition on October 1, 2026. User-reported confirmation; no independent post-test save inspection. |
 | Windows v1.2.0 works as expected | Repository owner explicitly confirmed it after receiving test saves with the supported unlock facts absent. This is a user-reported in-game result, not an automated test suite or proof for every possible save. |
 | Linux executable ran successfully | The author of [issue #2](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/2) reported placing it beside the saves and running it successfully. Distribution, Steam Deck compatibility, and in-game results were not explicitly reported. |
 | Linux save location | Issue #2 identifies Steam's `userdata/<user-id>/3669870/remote/` directory. The README uses `<Steam-folder>` to mean the Steam client folder containing `userdata`, which may differ from the game library folder. |
@@ -47,7 +56,7 @@ Archive parsing was informed by the [RMDTOC tool's format implementation](https:
 
 The main outfit database yielded 52 distinct fact IDs across 53 item mappings; two rain-jacket entries shared a flag. Another 16 outfit-related IDs appeared outside that main database in template, debug/loadout, and New Game Plus records. Those extra records were not all established selectable menu unlocks.
 
-The patcher's 14-item scope is intentional. Do not enable every discovered world fact: many facts track progression, and a named template record alone does not establish a valid cosmetic unlock. New support should have a defensible item mapping, an understood grant/revocation path, and user confirmation of the resulting behavior.
+The patcher's 15-item scope is intentional. Do not enable every discovered world fact: many facts track progression, and a named template record alone does not establish a valid cosmetic unlock. New support should have a defensible item mapping, an understood grant/revocation path, and user confirmation of the resulting behavior.
 
 ## Remaining uncertainty
 

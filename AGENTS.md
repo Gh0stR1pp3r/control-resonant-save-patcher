@@ -1,6 +1,8 @@
 # Working on Control Resonant Save Patcher
 
-This repository contains a small save editor for Control Resonant. Read this file before changing the implementation. The release baseline is v1.4.0 with Epic `.chunk` discovery and whole-save backups (October 1, 2026). Both platforms compiled. A user-run Windows/Steam result confirmed header cleanup and an exact 70-file backup on an already-unlocked save. Fresh unlock behavior in v1.4.0, Epic/WGS in-game behavior, cloud persistence and Linux v1.4.0 execution remain unconfirmed. Inspect the current source and release before assuming that baseline is still current.
+This repository contains a small save editor for Control Resonant. Read this file before changing the implementation. The release baseline is v1.4.1 (October 1, 2026), adding Deathadder Jacket (Razer) for 15 item flags and 11 applied-entitlement IDs. The repository owner tested the exact Windows release build and confirmed it works as expected with game file version `0.564.208.5`. This is a user-reported result, without independent post-test save inspection. Linux v1.4.1 compiled; its execution, Epic/WGS in-game behavior and cloud persistence remain unconfirmed. This release does not establish a fix for reported map delay or launch failures. Inspect the current source and release before assuming this baseline is still current.
+
+Whole-save backups and Steam/Epic/WGS storage handling are retained from v1.4.0. That earlier Windows/Steam result confirmed header cleanup and an exact 70-file backup on an already-unlocked save. The Razer reward mapping is confirmed in installed game data; see the technical documents for its IDs and evidence.
 
 ## Start here
 
