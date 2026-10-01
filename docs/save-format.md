@@ -1,6 +1,6 @@
 # Save format and patch boundaries
 
-Baseline: v1.3.0 source; the RMDB payload logic is retained from v1.2.0. See [WGS support](wgs-support.md) for storage metadata and backups. This is a partial decoder for the observed layout, not a general specification of every Control Resonant save version. All offsets below are decimal byte offsets from the start of a file unless stated otherwise. Serialized numbers use little-endian byte order.
+Baseline: v1.4.0; the RMDB payload logic is retained from v1.2.0. See [WGS support](wgs-support.md) for storage metadata and backups. This is a partial decoder for the observed layout, not a general specification of every Control Resonant save version. All offsets below are decimal byte offsets from the start of a file unless stated otherwise. Serialized numbers use little-endian byte order.
 
 ## Save selection and files
 
@@ -13,7 +13,7 @@ A set consists of four files with the same prefix:
 <prefix>-bundle-container
 ```
 
-Enumerate `*-header` beside the patcher. Parse every candidate, select the greatest embedded timestamp, reject ties, and require its complete four-file set. An invalid candidate header stops processing. The application uses its executable directory, not the terminal's working directory. Flat discovery does not search subdirectories; WGS follows explicit index references. Neither path falls back to an older complete set.
+Enumerate `*-header` and `*-header.chunk` beside the patcher. Epic `.chunk` files have the same observed RMDB envelope and parsed header/global schemas. Strip `.chunk` only from dictionary keys; physical paths, writes, backups, and rollback keep the extension. Reject duplicate normalized filenames. Keep separate containers for extensionless and `.chunk` files so partial sets cannot borrow members from another format. Ignore and preserve `--containerDisplayName.chunk` (the supplied sample is ASCII `slot-1`). Parse every candidate, select the greatest embedded timestamp, reject ties, and require its complete four-file set. An invalid candidate header stops processing. The application uses its executable directory, not the terminal's working directory. Flat discovery does not search subdirectories; WGS follows explicit index references. Neither path falls back to an older complete set.
 
 Files must be regular files without a reparse-point attribute, between 20 bytes and 64 MiB. These are implementation limits, not claims about every valid game save.
 
@@ -123,6 +123,10 @@ These were observed fallback values. Do not generalize them into arbitrary outfi
 
 `--check` calculates and reports proposed changes without writing or creating backups. A no-op patch also creates no backup.
 
-For an actual change, check that the game is closed, take the patcher lock, back up all four files to a unique `CosmeticSaveBackup-...` directory, and record original/patched SHA-256 hashes in `RESTORE.txt`. Stage changed files, recheck the game process and all original bytes, then replace changed files. Only header/global payloads are edited; for WGS the selected indexed byte total is adjusted if needed. WGS backups always include the selected container mapping and index. Attempt rollback from preserved originals on failure.
+For an actual change, check that the game is closed and take the patcher lock. Back up all recognized flat saves (the four known suffixes), all `.chunk` and `preferences_*` files, plus `steam_autocloud.vdf` and `remotecache.vdf` when present in the selected root. WGS additionally includes `containers.index` and every direct file in every indexed container directory, including non-save preference containers and additional container metadata. Discovery snapshots provide the indexed directories. Reject nested WGS directories rather than silently omitting data; do not follow arbitrary or unindexed folders.
+
+Stream originals into a unique `CosmeticSaveBackup-...` directory with physical relative paths. Do not apply RMDB size/version requirements to opaque backup-only files. Record source hashes in `RESTORE.txt`; verify copied selected-file and mapping hashes against the analysis snapshots. Re-enumerate membership and compare every backed-up source hash after copying and immediately before replacement. A failed backup is marked INCOMPLETE; no patch is installed. Only after these checks mark the backup COMPLETE, stage changes, recheck the game and selected bytes, and replace changed files. Header/global edits remain restricted to the newest set, with its WGS indexed total adjusted when needed. On failure, rollback only the files actually replaced using their retained original bytes.
+
+Backups exclude previous backup folders, patcher files, other accounts and unindexed WGS directories. Restoring a whole backup also rolls back the other included saves and preferences. Move newer live data aside first to avoid mixing store generations. This is a best-effort consistent file snapshot, not an OS transaction or cloud synchronization lock.
 
 Replacement is per file, not a transaction over the entire set. A crash between replacements can still require restoring all backed-up paths, including WGS metadata. Process detection currently uses the name `CONTROLResonant`; its reliability across Proton configurations is not independently established.

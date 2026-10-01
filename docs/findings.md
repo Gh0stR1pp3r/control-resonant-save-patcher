@@ -62,3 +62,23 @@ The patcher's 14-item scope is intentional. Do not enable every discovered world
 Xbox WGS file support from [hdfyeg35](https://github.com/hdfyeg35), commit `2de2299b72fab471d8f67988c1dc7702422a03b4`, is integrated in v1.3.0 source. Integration adds full metadata snapshot checks, rejects linked parent directories and ambiguous GUID mappings, and always backs up the selected mapping plus index. See [implementation details and limits](wgs-support.md).
 
 The fork reports analysis of supplied Xbox saves. No WGS in-game confirmation or cloud-persistence confirmation has been established for this integrated version. Earlier v1.2.0 confirmations concern flat saves. No implementation tests were requested or run during integration.
+
+## Epic save analysis and local v1.4.0 support (October 1, 2026)
+
+The user identified two supplied folders as Steam and Epic. The Steam snapshot contained 17 complete four-file sets; Epic contained 16. All 132 RMDB files had valid CRC32 checksums and envelope 2/2. Both used header version 16, global version 23, and world-fact version 4. Both newest saves had the expected nine-slot outfit layout. Their progress differed, so different flags and file sizes cannot be attributed to the storefront alone.
+
+Epic filenames omit the example Steam `slot-0_` prefix and append `.chunk`. The extra `--containerDisplayName.chunk` contains ASCII `slot-1`; it is preserved. No WGS index was supplied. One old Epic checkpoint had readable facts but no recognized nine-slot outfit container. The existing patcher rejection for that layout remains.
+
+Version 1.4.0 adds filename discovery using separate extensionless and `.chunk` containers with normalized-name collision rejection. Physical names are retained throughout backup and replacement. The RMDB edit logic and supported rewards remain unchanged. Runtime patching, in-game retention and cloud persistence have not been tested for Epic. File analysis and compilation alone do not establish those behaviors.
+
+## Whole-save backup revision (v1.4.0)
+
+The user requested backing up all save files rather than four selected files. Backup scope now includes all recognized flat saves, `.chunk` files, preferences and recognized Steam metadata in the selected directory; WGS includes the index and every file in all indexed containers, even preference-only containers. Backup file membership and SHA-256 values are checked before editing. The newest-set patch scope remains unchanged. Both builds compiled. Subsequent user-run Steam evidence is recorded below; broader platform confirmation remains outstanding.
+
+## User-run full-backup v1.4.0 evidence (October 1, 2026)
+
+The owner supplied before/after Steam saves and the generated backup. Of 70 save/preferences files, only the latest header changed, from 196 to 168 bytes. The exact difference was removal of seven uint32 applied-entitlement markers, an updated count (11 to 4) and CRC32. The entire global payload and equipped outfit records were unchanged. All 14 supported flags were already true. All 70 backed-up originals matched their recorded SHA-256 and the supplied original files. The executable matched the prepared full-backup Windows build.
+
+The owner reported that loading and saving made the same seven markers return. This is consistent with the analyzed grant routine adding markers for recognized entitlements. The current patcher removes every matching marker without determining live ownership, causing redundant cleanup and backups in this case. Removal is intended to prevent the analyzed revocation path for unrecognized entitlements; repeated removal of recognized grants has no demonstrated benefit while ownership remains recognized. Do not claim that every session requires repatching, or skip all cleanup solely because the unlock flags are true. A refinement would require reliable ownership evidence. This behavior is documented but unchanged in the published full-backup build.
+
+This Steam result does not demonstrate restoring missing flags with v1.4.0, Epic/WGS behavior, Linux v1.4.0 execution or cloud persistence. Earlier v1.2.0 unlock confirmations remain separate evidence.

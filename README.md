@@ -2,7 +2,7 @@
 
 ![Control Resonant](https://exputer.com/wp-content/uploads/2026/08/control-resonant.jpg)
 
-A Windows and Linux x64 utility for restoring unobtainable outfits/items in supported Control Resonant saves. Version **1.3.0** restores **13 cosmetics plus the Pickpocket's Tool charm** and removes their associated applied-entitlement entries.
+A Windows and Linux x64 utility for restoring unobtainable outfits/items in supported Control Resonant saves. Version **1.4.0** restores **13 cosmetics plus the Pickpocket's Tool charm** and removes their associated applied-entitlement entries.
 
 **Version 1.2.0 was tested and confirmed working on Windows with the current game version by the repository owner on September 27, 2026.**
 
@@ -10,10 +10,19 @@ A Windows and Linux x64 utility for restoring unobtainable outfits/items in supp
 
 ## Downloads
 
-The downloads below are **v1.3.0**, available for Windows and Linux x64. The Windows build adds Xbox app / Microsoft Store WGS support. Both builds compiled successfully; v1.3.0 has not yet been runtime-tested. The earlier Windows/Linux confirmations apply to v1.2.0. WGS in-game behavior and Xbox cloud synchronization remain unconfirmed.
+The downloads below are **v1.4.0**, available for Windows and Linux x64, with Steam, Epic `.chunk`, and Xbox app / Microsoft Store WGS save support. Both builds compiled successfully. A user-run Windows/Steam v1.4.0 result was inspected: the expected header cleanup succeeded and all 70 original save/preferences files were backed up exactly. All 14 supported unlocks were already enabled in that snapshot; this does not establish a fresh unlock test. Epic and WGS in-game behavior, cloud persistence, and Linux v1.4.0 execution remain unconfirmed.
 
 - **[Windows: CosmeticSavePatcher.exe](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/latest/download/CosmeticSavePatcher.exe)**
 - **[Linux x64: CosmeticSavePatcher-linux-x64](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/latest/download/CosmeticSavePatcher-linux-x64)** — includes .NET; no separate .NET installation or Wine needed. A Linux user reported successful execution in [issue #2](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/2).
+
+## New in 1.4.0
+
+- Adds Epic Games saves ending in `.chunk`, preserving physical filenames and backups.
+- Rejects duplicate normalized names and requires complete save sets within each format.
+- Backs up every recognized save set and preference file in the selected folder; WGS backups include every indexed container and its metadata.
+- Checks the complete backup file list and hashes before applying changes.
+- Retains the same 14 reward flags and existing Steam/WGS support.
+- Epic in-game compatibility and cloud persistence have not yet been confirmed.
 
 ## New in 1.3.0
 
@@ -66,7 +75,7 @@ Only the EXE is needed. No Python, installer, internet connection, or administra
 
 ### Windows: Xbox app / Microsoft Store WGS
 
-Use the v1.3.0 Windows download above. Close the game and let any ongoing synchronization finish. Keep a full copy of the WGS account folder before first use.
+Use the v1.4.0 Windows download above. Close the game and let any ongoing synchronization finish. Keep a full copy of the WGS account folder before first use.
 
 1. Open `%LOCALAPPDATA%\Packages\` and find the game's package folder beginning with `Remedy.CONTROLResonant_`.
 2. Open its `SystemAppData\wgs\` directory, then the account folder containing `containers.index`.
@@ -75,6 +84,18 @@ Use the v1.3.0 Windows download above. Close the game and let any ongoing synchr
 5. Start the game and check the items. Make a normal in-game save. Cloud persistence has not yet been confirmed for this integration.
 
 WGS discovery follows only the folders and blobs referenced by the index. It is not a recursive search. It selects the newest header and stops if that save is incomplete; it does not fall back to an older save. If both different GUID files referenced by one entry exist, the patcher stops rather than guessing which is current.
+
+### Epic Games: .chunk saves
+
+1. Close the game and let any ongoing cloud synchronization finish.
+2. Open the save folder containing matching `-header.chunk`, `-persi-global.chunk`, `-player.chunk`, and `-bundle-container.chunk` files. Use the folder containing the actual files, rather than a parent folder.
+3. Put the v1.4.0 patcher for your operating system beside those files. Keep the `.chunk` extensions and the existing `--containerDisplayName.chunk` file.
+4. On Windows, double-click `CosmeticSavePatcher.exe`. On Linux, use the terminal commands in the Linux section below.
+5. Read the result, then load the save in game. The newest set is chosen using the timestamp inside its header; all four matching files must be present.
+
+The patcher backs up all `.chunk` files in that folder, including the container-name file, using their original filenames. To undo, close the game and follow [Backups and undo](#backups-and-undo). Duplicate filenames with and without `.chunk` are rejected. Files from the two formats are never combined into one save set.
+
+Epic support has been implemented from the supplied saves; in-game behavior and Epic cloud persistence remain unconfirmed. Epic `.chunk` filename support requires v1.4.0 or later.
 
 ### Linux x64
 
@@ -129,15 +150,25 @@ The patcher uses the date inside the save, not its filename number or filesystem
 -bundle-container
 ```
 
-For flat saves, keep all four together beside the patcher; subfolders are not searched. To patch a particular flat save, put just its four files and the patcher in a separate folder. After patching that copy, copy all four save files back into the original save folder before starting the game.
+Epic uses the same four endings followed by `.chunk`, for example `auto-2-header.chunk`. Keep all four files in the same format. The container display-name file is preserved.
+
+For flat saves, keep all four together beside the patcher; subfolders are not searched. To patch a particular flat save, put just its four files and the patcher in a separate folder. Only files present beside the patcher are included in its backup; use the original save folder to back up all sets. After patching a separate copy, copy all four save files back into the original save folder before starting the game.
 
 For WGS, these are logical filenames mapped by the index to GUID blobs. Keep the full account-folder structure intact, with the patcher beside `containers.index`. Both formats select the newest header and require all four matching files; they stop on ties or an incomplete newest save.
 
 ## Backups and undo
 
-Before editing, the program copies all four selected save files into a new `CosmeticSaveBackup-...` folder. For WGS, it also backs up `containers.index` and the selected `container.N`, even when their contents do not need editing. Backup paths mirror the original GUID folders. Each backup includes `RESTORE.txt` with logical names, relative paths, and hashes.
+In v1.4.0, before editing, the program creates a `CosmeticSaveBackup-...` folder containing:
 
-To undo, close the game and restore every backed-up file to its recorded path, including WGS metadata. Restore a WGS backup before making further saves or allowing synchronization to advance the store; a partial backup from an older store state may no longer match other containers. Keep the full account-folder copy for recovery after later changes.
+- **Steam:** every save set in the current folder, all `preferences_*` files, and `steam_autocloud.vdf` / `remotecache.vdf` if present.
+- **Epic:** every `.chunk` file in the current folder, including `--containerDisplayName.chunk`, plus any preferences and recognized Steam save files there.
+- **WGS:** `containers.index` and every file in every indexed container directory, including preference containers and all `container.N` metadata. Original GUID paths are preserved.
+
+Other account folders, unindexed WGS directories, patcher executables, and previous backup folders are excluded. Flat-save subfolders are not searched. An unexpected subfolder inside an indexed WGS container stops the patch. `RESTORE.txt` lists original paths and SHA-256 hashes. Failed backups are marked **INCOMPLETE** and must not be restored. The patch is applied only after the backup succeeds and the source file list and hashes have been rechecked. Only the newest save set is patched. `--check` and already-patched saves create no backup.
+
+Earlier v1.3.0 backups contain only the selected save set and its WGS metadata.
+
+To undo, close the game and let cloud synchronization finish. Restore **all files listed in a COMPLETE backup** to their original paths, including preferences and WGS metadata; do not copy `RESTORE.txt` into the save folder. This returns all included saves and preferences to the backup point. If you have saved again since patching, first move the current save data to a separate recovery folder so newer files are not mixed with the backup. Keep that copy until recovery is confirmed. Cloud persistence remains unconfirmed.
 
 ## What changes
 
@@ -147,7 +178,13 @@ To undo, close the game and restore every backed-up file to its recorded path, i
 - Recalculates the affected CRC32 checksums.
 - For WGS, updates the selected container byte total in `containers.index` only if the changed blobs have a different combined size. It preserves the GUID mapping and sync fields.
 
-Other outfit choices, preferences, other save sets, and the game executable are preserved. WGS backups include metadata, and the index is updated only as described above. An already patched save requires no further changes.
+Other outfit choices, preferences, other save sets, and the game executable are preserved. WGS backups include metadata, and the index is updated only as described above. A save whose supported flags are enabled and whose matching applied markers are absent requires no further changes.
+
+## Why entitlement entries can return
+
+`Entitlement entries to remove` counts applied-grant markers, not new items to unlock. Removing a marker is intended to avoid the analyzed revocation path when the game does not recognize its entitlement. Version 1.4.0 removes matching markers without checking live account ownership.
+
+If the game recognizes a grant, it may add its marker again on the next load/save. Running the patcher can then remove that marker again and create another backup even though all supported cosmetics are already enabled. The owner observed seven markers returning in this way; the supplied before/after files showed only a header edit and no cosmetic changes. There is no demonstrated benefit from repeatedly removing those seven markers while those grants remain recognized. You do not need to rerun the patcher after every session if the desired items are still available.
 
 ## Check without editing
 
@@ -167,7 +204,7 @@ Use `--no-pause` for terminal automation or `--help` for a short summary.
 
 ## Compatibility and status
 
-Supports the analyzed save layout: RMDB 2/2, header version 16, global version 23, world facts version 4, and the known nine-slot outfit container. The program stops on invalid checksums, unsupported layouts, incomplete newest sets, ambiguous newest dates, or unrecognized files ending in `-header`.
+Supports the analyzed save layout: RMDB 2/2, header version 16, global version 23, world facts version 4, and the known nine-slot outfit container. The program stops on invalid checksums, unsupported layouts, incomplete newest sets, ambiguous newest dates, or unrecognized files ending in `-header` or `-header.chunk`. Some early checkpoints may lack the required nine-slot outfit container; those are rejected if selected.
 
 **Windows v1.2.0 was tested and confirmed working on the current game version by the repository owner on September 27, 2026**, including the expanded promotional rewards. The analyzed executable version is `0.563.737.9`. Future game updates may change the format or ownership behavior.
 

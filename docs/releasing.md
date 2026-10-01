@@ -2,7 +2,7 @@
 
 Repository: [Gh0stR1pp3r/control-resonant-save-patcher](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher).
 
-The documented baseline is [v1.3.0](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/tag/v1.3.0). Inspect the current branch, tags, release, and task instructions before publishing. Local scripts used by the original maintainer are not part of this repository and should not be assumed available to a future agent.
+The documented baseline is [v1.4.0](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/tag/v1.4.0). Inspect the current branch, tags, release, and task instructions before publishing. Local scripts used by the original maintainer are not part of this repository and should not be assumed available to a future agent.
 
 ## Build
 
@@ -89,4 +89,15 @@ Published v1.3.0 executable SHA-256 values:
 ```text
 ac96b88578623c2d11e0d3681f0de13bf51f273ea132dd24e1126788e14ee4db  CosmeticSavePatcher.exe
 9d43c64f78698e50cfaf42222bb554d619e8437bd09dcf445378352f3773089d  CosmeticSavePatcher-linux-x64
+```
+
+## v1.4.0 release status
+
+Version 1.4.0 publishes the full-backup builds, including Epic `.chunk` support. A user-run Windows/Steam result was inspected: only seven header markers changed, all 14 supported flags were already enabled, and the 70-file original backup was byte-identical. This establishes that run, not fresh unlock behavior or Epic/WGS/cloud compatibility. Linux v1.4.0 compiled but execution remains unconfirmed. Repeated cleanup of markers re-added by the game is documented and remains unchanged in this release.
+
+Published v1.4.0 executable SHA-256 values:
+
+```text
+2e46643cce2db21906a2cd8d9cafbb7dab64b3f1aea0ddd738291a415448f409  CosmeticSavePatcher.exe
+db0183622a6b625e6317f6f06c67d948f884d8a394e6550813dceba9a529ab76  CosmeticSavePatcher-linux-x64
 ```

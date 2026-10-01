@@ -1,14 +1,16 @@
-COSMETIC SAVE PATCHER 1.3.0
+COSMETIC SAVE PATCHER 1.4.0
 
-Restores 13 cosmetics and the Pickpocket's Tool charm. Version 1.3.0 adds
-Xbox app / Microsoft Store WGS file support. Windows v1.2.0 was
+Restores 13 cosmetics and the Pickpocket's Tool charm. Version 1.4.0 adds
+Epic Games .chunk saves, retaining Steam and Xbox WGS file support. Windows v1.2.0 was
 tested and confirmed working on the current game version by the repository
 owner on September 27, 2026. A Linux user reported successful execution (issue #2).
 
-Version 1.3.0 downloads are available for Windows and Linux x64. Both
-builds compiled successfully; v1.3.0 has not yet been runtime-tested.
-Earlier Windows/Linux confirmations apply to v1.2.0. WGS in-game behavior
-and Xbox cloud synchronization remain unconfirmed.
+Version 1.4.0 supports Steam, Epic .chunk and Xbox WGS saves. Both Windows
+and Linux builds compiled. A user-run Windows/Steam result was inspected:
+header cleanup succeeded and all 70 original files were backed up exactly.
+All 14 supported flags were already enabled; this was not a fresh unlock
+test. Epic/WGS in-game behavior, cloud persistence and Linux v1.4.0 execution
+remain unconfirmed. Earlier platform confirmations apply to v1.2.0.
 Xbox WGS file support contributed by hdfyeg35: https://github.com/hdfyeg35
 
 INCLUDED ITEMS
@@ -60,7 +62,7 @@ The EXE is standalone: copy only CosmeticSavePatcher.exe to the save folder.
 No Python, installer, internet connection or administrator access is needed.
 It uses the .NET Framework provided with Windows 10/11.
 
-WINDOWS: XBOX APP / MICROSOFT STORE WGS (v1.3.0)
+WINDOWS: XBOX APP / MICROSOFT STORE WGS
 
 1. Close the game and wait for synchronization to finish. Keep a full copy
    of your WGS account folder before first use.
@@ -78,6 +80,21 @@ mapping snapshots before writing, and rejects linked parent directories,
 duplicate mappings, and entries where both different GUID files exist.
 It updates only the selected indexed byte total when blob sizes change.
 WGS index version 14 and container metadata version 4 are supported.
+
+EPIC GAMES: .chunk SAVES
+
+1. Close the game and let cloud synchronization finish.
+2. Find the folder containing matching -header.chunk, -persi-global.chunk,
+   -player.chunk and -bundle-container.chunk files.
+3. Put this patcher beside those files and run it. On Linux use the terminal
+   commands below. Keep the .chunk filenames and --containerDisplayName.chunk.
+4. Read the result, then start the game and load the save.
+
+The patcher backs up all .chunk files under their original names, including
+--containerDisplayName.chunk. To undo, follow the Backups section below. Duplicate
+names with and without .chunk are rejected. A save set must have all four
+files in the same format; an incomplete newest set stops processing.
+Epic in-game behavior and cloud persistence remain unconfirmed.
 
 LINUX X64
 1. Close the game completely.
@@ -130,14 +147,16 @@ must have the same prefix and end in:
   -persi-global
   -player
   -bundle-container
-Keep all four together. The program uses the date inside each header,
+Epic appends .chunk to each ending. Keep original filenames and use the
+same format for all four files. Keep all four together. The program uses the date inside each header,
 not the filename number or filesystem modification date. It patches only
 the newest set: flat files beside the patcher, or WGS blobs in indexed
 folders. It stops if the newest set is incomplete or timestamps are tied.
 Keep the full WGS account-folder structure intact. For a particular flat save,
 put just its four files and the patcher into a separate folder. After
 patching that copy, copy all four save files back into the original save
-folder before starting the game.
+folder before starting the game. Only files in the selected folder can be
+backed up; use the original save folder to include every save set.
 
 What does it change?
 It restores the 14 item flags listed above, including missing entries,
@@ -149,18 +168,46 @@ are found, it restores those selections too. Adding promotional flags
 alone does not change your equipped outfit. Equip the items yourself
 from the cosmetic menu. Other outfit choices are preserved.
 Preferences, other save sets, and the game executable are not edited.
-Running it again on an already patched save makes no further changes.
+Running it again makes no changes if supported flags remain enabled and
+matching applied-entitlement markers remain absent.
 
 Backups
-Before editing, it copies the four selected files into CosmeticSaveBackup-...
-beside the patcher. WGS backups also contain containers.index and the selected
-container.N, even if no metadata edit is needed. Paths mirror the GUID folders.
-RESTORE.txt records names, paths and original/patched hashes.
+Before editing, this v1.4.0 build creates CosmeticSaveBackup-... beside
+the patcher, containing ALL recognized save data in the selected folder:
+- Steam: all save sets, preferences_* files, and steam_autocloud.vdf /
+  remotecache.vdf when present.
+- Epic: every .chunk file, including --containerDisplayName.chunk, plus
+  any preferences and recognized Steam save files there.
+- WGS: containers.index and every file in every indexed container folder,
+  including preference containers and all container.N metadata.
 
-To undo, close the game and restore EVERY backed-up path, including metadata.
-Restore before making further saves or allowing synchronization to advance the
-WGS store. Use your full account-folder copy if later store changes make the
-partial backup incompatible with other containers.
+Original names and relative GUID paths are preserved. Other account folders,
+unindexed WGS directories, executables and previous backups are excluded.
+Flat-save subfolders are not searched. Unexpected nested WGS folders stop
+the patch. RESTORE.txt lists paths and SHA-256 hashes. An INCOMPLETE backup
+must not be restored. Source file lists and hashes are rechecked before
+patching. Only the newest save set is changed. --check and already-patched
+saves create no backup. Earlier v1.3.0 used selected-set backups.
+
+To undo, close the game and let synchronization finish. Restore ALL files
+listed in a COMPLETE backup to their original paths, including preferences
+and WGS metadata. Do not copy RESTORE.txt into the save folder. This returns
+all included saves and preferences to the backup point. If newer saves
+exist, move current save data to a separate recovery folder before restoring
+so newer files are not mixed with the backup. Keep that copy until recovery
+is confirmed. Cloud persistence remains unconfirmed.
+
+Why entitlement entries can return
+The entitlement-removal count describes applied-grant markers, not new
+cosmetics. Removing markers is intended to avoid revocation of rewards
+whose entitlement the game does not recognize. Version 1.4.0 removes
+matching markers without checking live account ownership.
+The game can add recognized grants back on a later load/save. The patcher
+then removes them again and creates another backup, even when all supported
+items are already enabled. The owner observed seven returning markers;
+the compared files showed only header changes. Repeated cleanup has no
+demonstrated benefit while those grants remain recognized. There is no need
+to rerun after every session if the desired items are still available.
 
 Checking without changing anything
 Windows PowerShell:
@@ -176,7 +223,9 @@ WGS additionally validates metadata and indexed byte totals; shared source
 builds for both platforms, with Xbox app WGS usage intended for Windows.
 It stops on bad checksums, unsupported layouts, incomplete newest sets,
 or tied newest timestamps. It does not guess new layouts after an update.
-Unknown header files ending in -header also cause it to stop.
+Unknown header files ending in -header or -header.chunk also cause it
+to stop. Early checkpoints without the nine-slot outfit container are
+not supported if selected.
 The Windows 1.2.0 patcher was tested and confirmed working on the current
 game version by the repository owner on September 27, 2026, including the
 six added promotional cosmetics. The analyzed game executable version is

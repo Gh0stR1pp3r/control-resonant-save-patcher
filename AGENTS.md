@@ -1,6 +1,6 @@
 # Working on Control Resonant Save Patcher
 
-This repository contains a small save editor for Control Resonant. Read this file before changing the implementation. The release baseline is v1.3.0 with integrated WGS support (October 1, 2026). Both platforms compiled successfully; v1.3.0 runtime behavior and WGS cloud persistence remain unconfirmed. Inspect the current source and release before assuming that baseline is still current.
+This repository contains a small save editor for Control Resonant. Read this file before changing the implementation. The release baseline is v1.4.0 with Epic `.chunk` discovery and whole-save backups (October 1, 2026). Both platforms compiled. A user-run Windows/Steam result confirmed header cleanup and an exact 70-file backup on an already-unlocked save. Fresh unlock behavior in v1.4.0, Epic/WGS in-game behavior, cloud persistence and Linux v1.4.0 execution remain unconfirmed. Inspect the current source and release before assuming that baseline is still current.
 
 ## Start here
 
@@ -20,8 +20,8 @@ This repository contains a small save editor for Control Resonant. Read this fil
 ## Working rules
 
 - Preserve unrelated facts, outfit choices, save sets, and preferences. Changes to the supported reward list need evidence and must fit the user's requested scope.
-- Keep checksum and layout validation, backups of all four save files plus selected WGS metadata, full metadata-snapshot comparisons before writing (including zero-size-delta patches), and rollback handling. Stop on unsupported layouts instead of guessing offsets.
-- Select the newest save by its embedded timestamp, never by its filename number or filesystem modification time. Scan flat saves beside the executable. WGS discovery may follow only explicitly indexed container paths; do not recursively search arbitrary folders.
+- Keep checksum and layout validation, backups of all recognized flat saves/preferences and every file in all indexed WGS containers, including metadata, full metadata-snapshot comparisons before writing (including zero-size-delta patches), full backup-membership and hash checks before replacement, and rollback handling. Mark failed backups INCOMPLETE and never install a patch after an incomplete backup. Stream copies to avoid retaining the whole store in memory. Stop on unsupported layouts instead of guessing offsets.
+- Select the newest save by its embedded timestamp, never by its filename number or filesystem modification time. Scan flat saves beside the executable. For Epic, strip `.chunk` only from logical lookup keys and retain original physical paths. Reject duplicate normalized names and never combine extensionless and `.chunk` members in one set. Preserve `--containerDisplayName.chunk`. WGS discovery may follow only explicitly indexed container paths; do not recursively search arbitrary folders.
 - Use **Control Resonant** in player-facing text. Keep `CONTROLResonant` where an actual process identifier is required, such as `Process.GetProcessesByName`.
 - Do not reintroduce references to experimental or modified game executables in the player README.
 - Do not commit personal saves, game executables, extracted game assets, credentials, or local publication journals. Publish only explicitly selected project files.

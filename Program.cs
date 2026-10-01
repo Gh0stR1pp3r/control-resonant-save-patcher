@@ -9,13 +9,13 @@ using System.Security.Cryptography;
 using System.Text;
 
 [assembly: AssemblyTitle("Cosmetic Save Patcher")]
-[assembly: AssemblyVersion("1.3.0.0")]
-[assembly: AssemblyFileVersion("1.3.0.0")]
-[assembly: AssemblyInformationalVersion("1.3.0")]
+[assembly: AssemblyVersion("1.4.0.0")]
+[assembly: AssemblyFileVersion("1.4.0.0")]
+[assembly: AssemblyInformationalVersion("1.4.0")]
 
 internal static class Program
 {
-    const string Version = "1.3.0";
+    const string Version = "1.4.0";
     // Xbox WGS storage support contributed by https://github.com/hdfyeg35.
     static readonly StringComparison PathComparison = System.IO.Path.DirectorySeparatorChar == '\\'
         ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
@@ -74,6 +74,7 @@ internal static class Program
     {
         public string Name;
         public Dictionary<string, string> Files;
+        public string FileExtension;
         public string IndexPath;
         public string MetadataPath;
         public long IndexSizeOffset;
@@ -105,6 +106,7 @@ internal static class Program
 #endif
                     "Close the game first. The newest save must have all four matching files.\n" +
                     "Steam: place the patcher beside the flat save files.\n" +
+                    "Epic Games: place it beside the four matching .chunk save files; keep their names.\n" +
                     "Xbox PC: place it beside containers.index in the per-user WGS folder.\n" +
                     "WGS containers are not rebuilt; only mapped blobs and required size metadata change.\n\n" +
                     "--check     Inspect only: do not patch or create backups.\n" +
@@ -112,7 +114,8 @@ internal static class Program
                     "Restores 14 item unlock flags and removes up to ten\n" +
                     "associated applied-entitlement entries.\n" +
                     "Supports the supplied game's header version 16 and global version 23.\n" +
-                    "Backups are created automatically before patching.");
+                    "Backups include all save sets and preferences in this folder,\n" +
+                    "or all indexed WGS containers and metadata, before patching.");
             }
             else Run(args.Contains("--check"));
         }
@@ -362,6 +365,80 @@ internal static class Program
         Require(!running, "Close Control Resonant before patching, then run this program again.");
     }
 
+    static bool IsFlatBackupFile(string name)
+    {
+        return Suffixes.Any(suffix => name.EndsWith("-" + suffix, StringComparison.Ordinal))
+            || name.EndsWith(".chunk", StringComparison.Ordinal)
+            || name.StartsWith("preferences_", StringComparison.Ordinal)
+            || name == "steam_autocloud.vdf" || name == "remotecache.vdf";
+    }
+
+    static HashSet<string> CollectBackupPaths(string directory, bool wgs,
+        Dictionary<string, byte[]> metadataSnapshots)
+    {
+        var paths = new HashSet<string>(PathComparer);
+        foreach (string path in Directory.GetFiles(directory, "*", SearchOption.TopDirectoryOnly))
+            if (IsFlatBackupFile(System.IO.Path.GetFileName(path))) paths.Add(path);
+        if (wgs)
+        {
+            string indexPath = System.IO.Path.Combine(directory, "containers.index");
+            paths.Add(indexPath);
+            // Discovery snapshots include mappings for every indexed container,
+            // even containers without a game header (for example preferences).
+            foreach (string metadataPath in metadataSnapshots.Keys)
+            {
+                RequireSafeSavePath(directory, metadataPath);
+                if (string.Equals(metadataPath, indexPath, PathComparison)) continue;
+                string containerDirectory = System.IO.Path.GetDirectoryName(metadataPath);
+                // WGS blobs and container.N mappings are direct children. Refuse
+                // unexpected nested layouts rather than silently omitting data.
+                Require(Directory.GetDirectories(containerDirectory).Length == 0,
+                    "Unexpected nested WGS directory; could not make a complete backup.");
+                foreach (string path in Directory.GetFiles(containerDirectory)) paths.Add(path);
+            }
+        }
+        foreach (string path in paths) RequireSafeSavePath(directory, path);
+        return paths;
+    }
+
+    static string HashFile(string path)
+    {
+        using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+        using (var sha = SHA256.Create())
+            return BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", "").ToLowerInvariant();
+    }
+
+    static string CopyBackupFile(string directory, string source, string destination)
+    {
+        RequireSafeSavePath(directory, source);
+        using (var input = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read))
+        using (var output = new FileStream(destination, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+        {
+            input.CopyTo(output);
+            output.Flush(true);
+        }
+        return HashFile(destination);
+    }
+
+    static void RequireBackupUnchanged(string directory, bool wgs,
+        Dictionary<string, byte[]> metadataSnapshots, Dictionary<string, string> backupHashes,
+        IEnumerable<string> stagedPaths = null)
+    {
+        RequireMetadataUnchanged(directory, metadataSnapshots);
+        var currentPaths = CollectBackupPaths(directory, wgs, metadataSnapshots);
+        // WGS staging files are created beside their blobs. Exclude only this
+        // operation's exact temp paths from the original-store membership check.
+        if (stagedPaths != null) currentPaths.ExceptWith(stagedPaths);
+        Require(currentPaths.SetEquals(backupHashes.Keys),
+            "The save-file list changed during backup. No patch was installed; close the game and wait for synchronization.");
+        foreach (var file in backupHashes)
+        {
+            RequireSafeSavePath(directory, file.Key);
+            Require(HashFile(file.Key) == file.Value,
+                "A save or preference file changed during backup. No patch was installed; close the game and retry.");
+        }
+    }
+
     static byte[] ReadMetadata(string path, int minimumBytes, int maximumBytes)
     {
         RegularFile(path);
@@ -519,16 +596,29 @@ internal static class Program
             return ReadWgsSaveContainers(directory, metadataSnapshots);
         }
         wgs = false;
-        Console.WriteLine("Save format: flat files (Steam/compatible)");
         var files = new Dictionary<string, string>(StringComparer.Ordinal);
+        var chunks = new Dictionary<string, string>(StringComparer.Ordinal);
+        var logicalNames = new HashSet<string>(StringComparer.Ordinal);
         foreach (string path in Directory.GetFiles(directory, "*", SearchOption.TopDirectoryOnly))
         {
             string name = System.IO.Path.GetFileName(path);
+            bool chunk = name.EndsWith(".chunk", StringComparison.Ordinal);
+            // Normalize only the logical key. Reads, replacements, backups and
+            // rollback retain the original physical path, including .chunk.
+            if (chunk) name = name.Substring(0, name.Length - ".chunk".Length);
             if (!Suffixes.Any(suffix => name.EndsWith("-" + suffix, StringComparison.Ordinal))) continue;
-            Require(!files.ContainsKey(name), "Duplicate save filename: " + name);
-            files.Add(name, path);
+            Require(logicalNames.Add(name),
+                "Ambiguous save filenames for " + name + ". Keep only one copy, with or without .chunk, in this folder.");
+            (chunk ? chunks : files).Add(name, path);
         }
-        return new List<SaveContainer> { new SaveContainer { Name = "flat", Files = files } };
+        // Keep formats separate so an incomplete .chunk set cannot borrow a
+        // matching extensionless file (or vice versa).
+        var containers = new List<SaveContainer>();
+        if (files.Count > 0) containers.Add(new SaveContainer { Name = "Steam / compatible", Files = files, FileExtension = "" });
+        if (chunks.Count > 0) containers.Add(new SaveContainer { Name = "Epic Games (.chunk)", Files = chunks, FileExtension = ".chunk" });
+        Console.WriteLine("Save format: " + (chunks.Count == 0 ? "flat files (Steam/compatible)"
+            : files.Count == 0 ? "Epic Games (.chunk)" : "flat files and Epic Games (.chunk)"));
+        return containers;
     }
 
     static void Run(bool checkOnly)
@@ -554,7 +644,7 @@ internal static class Program
         }
         Require(candidates.Count > 0, wgs
             ? "No Control Resonant save headers were found in the active WGS containers."
-            : "No save files found beside this EXE. Place it with the four matching save files.");
+            : "No save files found beside the patcher. Place it with four matching Steam or Epic .chunk save files.");
         candidates = candidates.OrderByDescending(candidate => candidate.Header.Timestamp).ToList();
         SaveCandidate latestCandidate = candidates[0];
         SaveHeader latest = latestCandidate.Header;
@@ -567,7 +657,8 @@ internal static class Program
         {
             string name = stem + suffix;
             string path;
-            Require(latestCandidate.Container.Files.TryGetValue(name, out path), "Missing matching save file: " + name);
+            Require(latestCandidate.Container.Files.TryGetValue(name, out path),
+                "Missing matching save file: " + name + (latestCandidate.Container.FileExtension ?? ""));
             RequireSafeSavePath(directory, path);
             byte[] data = Read(path);
             Validate(data, name);
@@ -577,6 +668,7 @@ internal static class Program
         Require(originals[latest.Path].SequenceEqual(latest.Bytes), "The save changed during inspection. Close the game and try again.");
         Console.WriteLine("Newest save: " + System.IO.Path.GetFileName(stem).TrimEnd('-'));
         if (wgs) Console.WriteLine("WGS container: " + latestCandidate.Container.Name);
+        else Console.WriteLine("Selected format: " + latestCandidate.Container.Name);
         Console.WriteLine("Saved (UTC): " + new DateTime(1970, 1, 1).AddSeconds(latest.Timestamp).ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
         int preorderFacts, extraFacts, slots;
         byte[] global = PatchGlobal(originals[stem + "persi-global"], out preorderFacts, out extraFacts, out slots);
@@ -626,7 +718,7 @@ internal static class Program
         try
         {
             using (var exclusive = new FileStream(lockPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
-                Commit(directory, filePaths, originals, changes, metadataSnapshots);
+                Commit(directory, filePaths, originals, changes, metadataSnapshots, wgs);
         }
         finally
         {
@@ -639,29 +731,51 @@ internal static class Program
     }
     static void Commit(string directory, Dictionary<string, string> filePaths,
         Dictionary<string, byte[]> originals, Dictionary<string, byte[]> changes,
-        Dictionary<string, byte[]> metadataSnapshots)
+        Dictionary<string, byte[]> metadataSnapshots, bool wgs)
     {
         RequireMetadataUnchanged(directory, metadataSnapshots);
         string backup = System.IO.Path.Combine(directory, "CosmeticSaveBackup-" + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss") + "-" + Guid.NewGuid().ToString("N").Substring(0, 8));
         Directory.CreateDirectory(backup);
         Console.WriteLine("Backup: " + backup);
-        var log = new StringBuilder("Cosmetic Save Patcher " + Version + "\r\n\r\nClose the game before restoring files from this backup.\r\nBackup paths mirror the original save-folder layout, including WGS GUID folders.\r\n\r\n");
-        foreach (var file in originals)
-        {
-            string relativePath = RelativeSavePath(directory, filePaths[file.Key]);
-            string backupPath = System.IO.Path.Combine(backup, relativePath);
-            string backupDirectory = System.IO.Path.GetDirectoryName(backupPath);
-            if (!string.IsNullOrEmpty(backupDirectory)) Directory.CreateDirectory(backupDirectory);
-            WriteNew(backupPath, file.Value);
-            log.AppendLine(file.Key + " -> " + relativePath + " original SHA256 " + Hash(file.Value));
-        }
-        foreach (var file in changes) log.AppendLine(file.Key + " patched SHA256  " + Hash(file.Value));
+        var log = new StringBuilder("Cosmetic Save Patcher " + Version + "\r\n\r\n" +
+            "Close the game and let cloud synchronization finish before restoring.\r\n" +
+            "Restore all listed files to their original relative paths, including preferences and WGS metadata.\r\n" +
+            "This backup covers all recognized save files in this folder and all files in indexed WGS containers.\r\n" +
+            "Other account folders, unindexed WGS directories, patcher files and older backups are not included.\r\n" +
+            "For recovery after later saves, move the current save data aside first; do not mix it with this snapshot.\r\n" +
+            "Do not copy RESTORE.txt into the save folder. Cloud persistence is not guaranteed.\r\n\r\n");
         string logPath = System.IO.Path.Combine(backup, "RESTORE.txt");
-        File.WriteAllText(logPath, log.ToString(), Encoding.UTF8);
+        File.WriteAllText(logPath, log.ToString() + "Backup status: INCOMPLETE. Do not restore this backup.\r\n", Encoding.UTF8);
         var staged = new Dictionary<string, string>(StringComparer.Ordinal);
         var committed = new List<string>();
+        var backupHashes = new Dictionary<string, string>(PathComparer);
+        bool backupComplete = false;
         try
         {
+            HashSet<string> backupPaths = CollectBackupPaths(directory, wgs, metadataSnapshots);
+            Require(filePaths.Values.All(path => backupPaths.Contains(path)),
+                "A selected save file is missing from the backup plan.");
+            var expectedHashes = new Dictionary<string, string>(PathComparer);
+            foreach (var file in originals) expectedHashes[filePaths[file.Key]] = Hash(file.Value);
+            foreach (var file in metadataSnapshots) expectedHashes[file.Key] = Hash(file.Value);
+            foreach (string path in backupPaths.OrderBy(path => path, PathComparer))
+            {
+                string relativePath = RelativeSavePath(directory, path);
+                string backupPath = System.IO.Path.Combine(backup, relativePath);
+                Directory.CreateDirectory(System.IO.Path.GetDirectoryName(backupPath));
+                string hash = CopyBackupFile(directory, path, backupPath);
+                string expected;
+                Require(!expectedHashes.TryGetValue(path, out expected) || hash == expected,
+                    "A selected save or WGS mapping changed before backup. No patch was installed.");
+                backupHashes.Add(path, hash);
+                log.AppendLine(relativePath + " original SHA256 " + hash);
+            }
+            RequireBackupUnchanged(directory, wgs, metadataSnapshots, backupHashes);
+            foreach (var file in changes)
+                log.AppendLine(RelativeSavePath(directory, filePaths[file.Key]) + " patched SHA256  " + Hash(file.Value));
+            File.WriteAllText(logPath, log.ToString() + "\r\nBackup status: COMPLETE. Patch status: pending.\r\n", Encoding.UTF8);
+            backupComplete = true;
+            Console.WriteLine("Backed up " + backupHashes.Count + " save and metadata files.");
             foreach (var file in changes)
             {
                 string target = filePaths[file.Key];
@@ -673,7 +787,7 @@ internal static class Program
                 WriteNew(temp, file.Value);
             }
             CheckGameClosed();
-            RequireMetadataUnchanged(directory, metadataSnapshots);
+            RequireBackupUnchanged(directory, wgs, metadataSnapshots, backupHashes, staged.Values);
             foreach (var file in originals)
             {
                 RequireSafeSavePath(directory, filePaths[file.Key]);
@@ -690,6 +804,9 @@ internal static class Program
         }
         catch (Exception failure)
         {
+            try { File.AppendAllText(logPath, "\r\nPatch status: failed; " +
+                (backupComplete ? "backup completed before patching." : "backup incomplete; do not restore it.") + "\r\n"); }
+            catch { } // Logging failure must not prevent rollback.
             bool restored = true;
             foreach (string name in committed.AsEnumerable().Reverse())
             {
@@ -702,7 +819,7 @@ internal static class Program
             }
             throw new IOException("Could not finish patching: " + failure.Message + "\n" +
                 (restored ? "Original save files were retained or restored." : "Restore every backed-up path, including WGS metadata, before playing.") +
-                "\nBackup: " + backup, failure);
+                "\n" + (backupComplete ? "Backup: " : "Incomplete backup (do not restore): ") + backup, failure);
         }
         finally
         {

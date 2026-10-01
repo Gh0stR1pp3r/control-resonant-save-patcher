@@ -25,11 +25,11 @@ These checks reject observed changes; they do not provide an OS transaction or a
 
 ## Backup, commit, and recovery
 
-Any actual WGS patch backs up the four selected blobs, the index, and the selected mapping file, even when metadata itself is unchanged. Backups mirror physical GUID paths and record logical names and hashes. All discovered mapping snapshots are checked for concurrency; only the selected mapping needs to be included in the backup.
+Version 1.4.0 backs up the index and every file in every indexed container directory, including preferences and every container mapping. Indexed directories come from all discovery metadata snapshots, including containers without headers. Unexpected nested directories are rejected. Copies stream to disk, preserve physical GUID paths and receive SHA-256 hashes. Source file membership and all hashes are rechecked after backup and before replacement, in addition to the original metadata comparisons. No patch is installed after an incomplete backup. Earlier v1.3.0 retains its earlier selected-set backup behavior.
 
 Stage replacements beside their targets. Replace changed blob files first, followed by the index if its total changes. Keep GUIDs, mapping contents, sync-state fields, and timestamps in the index unchanged. On failure, attempt rollback and direct the user to restore every backed-up path if rollback fails.
 
-The backup is not a full account-store snapshot. Restore it before advancing the store with new saves or synchronization. If other containers have changed since the backup, restoring an old global index with only the selected blobs may be inconsistent; keep a full account-folder copy for such recovery.
+The v1.4.0 backup covers the indexed store, but excludes other accounts, unindexed directories and patcher files. Restore all listed files and metadata from a COMPLETE backup together. If later saves or synchronization have advanced the store, move current data aside first to avoid mixing generations. Retain that recovery copy. All included saves and preferences return to the backup point. These checks do not guarantee cloud acceptance or an atomic snapshot against concurrent external writers.
 
 ## Validation status
 
