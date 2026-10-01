@@ -97,8 +97,24 @@ WGS discovery follows only the folders and blobs referenced by the index. It is 
 
 ### Epic Games: .chunk saves
 
+A user reported the following Windows save location:
+
+```text
+%LOCALAPPDATA%\Remedy\CONTROLResonant\<account-id>\<slot-folder>\
+```
+
+Expanded form:
+
+```text
+C:\Users\<Windows-user>\AppData\Local\Remedy\CONTROLResonant\<account-id>\<slot-folder>\
+```
+
+`%LOCALAPPDATA%` opens the current Windows user's local AppData folder. `<Windows-user>` is your Windows profile folder name; `<account-id>` is the long generated folder name inside `CONTROLResonant`, which differs between accounts. `<slot-folder>` is the save-slot folder: the reported example was `slot-1`. If you have several account or slot folders, choose the one containing the save you want to patch. These placeholders are not literal folder names.
+
+Press **Win+R**, enter `%LOCALAPPDATA%\Remedy\CONTROLResonant`, and open your account folder, then `slot-1` or the appropriate slot folder. Put the patcher **inside that slot folder, beside the actual `.chunk` files**. It does not search the parent account folder or subfolders.
+
 1. Close the game and let any ongoing cloud synchronization finish.
-2. Open the save folder containing matching `-header.chunk`, `-persi-global.chunk`, `-player.chunk`, and `-bundle-container.chunk` files. Use the folder containing the actual files, rather than a parent folder.
+2. Open the account and slot folder described above. Confirm that it contains matching `-header.chunk`, `-persi-global.chunk`, `-player.chunk`, and `-bundle-container.chunk` files.
 3. Put the v1.4.1 patcher for your operating system beside those files. Keep the `.chunk` extensions and the existing `--containerDisplayName.chunk` file.
 4. On Windows, double-click `CosmeticSavePatcher.exe`. On Linux, use the terminal commands in the Linux section below.
 5. Read the result, then load the save in game. The newest set is chosen using the timestamp inside its header; all four matching files must be present.

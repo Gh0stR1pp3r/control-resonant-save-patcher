@@ -17,6 +17,7 @@ Whole-save backups and Steam/Epic/WGS storage handling are retained from v1.4.0.
 - `build.ps1`: Windows .NET Framework compiler invocation; produces `CosmeticSavePatcher.exe`.
 - `CosmeticSavePatcher.Linux.csproj`: self-contained Linux x64 build; produces `publish/linux-x64/CosmeticSavePatcher-linux-x64`.
 - `README.md` and `README.txt`: keep overlapping instructions and item descriptions consistent.
+- Epic Windows saves were reported under `%LOCALAPPDATA%\Remedy\CONTROLResonant\<account-id>\<slot-folder>\` (example slot: `slot-1`). Account and slot folder names vary; place the patcher beside actual `.chunk` files. A reported location alone does not establish in-game/cloud compatibility.
 - `DOTNET-NOTICES.txt`: bundled runtime notices; also embedded in the Linux executable.
 
 ## Working rules
@@ -24,7 +25,7 @@ Whole-save backups and Steam/Epic/WGS storage handling are retained from v1.4.0.
 - Preserve unrelated facts, outfit choices, save sets, and preferences. Changes to the supported reward list need evidence and must fit the user's requested scope.
 - Keep checksum and layout validation, backups of all recognized flat saves/preferences and every file in all indexed WGS containers, including metadata, full metadata-snapshot comparisons before writing (including zero-size-delta patches), full backup-membership and hash checks before replacement, and rollback handling. Mark failed backups INCOMPLETE and never install a patch after an incomplete backup. Stream copies to avoid retaining the whole store in memory. Stop on unsupported layouts instead of guessing offsets.
 - Select the newest save by its embedded timestamp, never by its filename number or filesystem modification time. Scan flat saves beside the executable. For Epic, strip `.chunk` only from logical lookup keys and retain original physical paths. Reject duplicate normalized names and never combine extensionless and `.chunk` members in one set. Preserve `--containerDisplayName.chunk`. WGS discovery may follow only explicitly indexed container paths; do not recursively search arbitrary folders.
-- Use **Control Resonant** in player-facing text. Keep `CONTROLResonant` where an actual process identifier is required, such as `Process.GetProcessesByName`.
+- Use **Control Resonant** in player-facing text. Keep `CONTROLResonant` where an actual process identifier or on-disk directory name is required, such as `Process.GetProcessesByName` or the Epic save path.
 - Do not reintroduce references to experimental or modified game executables in the player README.
 - Do not commit personal saves, game executables, extracted game assets, credentials, or local publication journals. Publish only explicitly selected project files.
 - Do not print or store authentication tokens. Use the user's existing authentication or an environment variable.

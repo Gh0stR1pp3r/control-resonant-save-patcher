@@ -96,6 +96,24 @@ WGS index version 14 and container metadata version 4 are supported.
 
 EPIC GAMES: .chunk SAVES
 
+Windows save location reported by a user:
+%LOCALAPPDATA%\Remedy\CONTROLResonant\<account-id>\<slot-folder>\
+
+Expanded form:
+C:\Users\<Windows-user>\AppData\Local\Remedy\CONTROLResonant\<account-id>\<slot-folder>\
+
+%LOCALAPPDATA% means your Windows user's local AppData folder.
+<Windows-user> is your Windows profile folder name.
+<account-id> is the long generated folder name inside CONTROLResonant;
+it differs between accounts. <slot-folder> is the save-slot folder;
+the reported example was slot-1. Use the slot containing your actual saves.
+Do not type the angle-bracket placeholders literally.
+
+Press Win+R, enter %LOCALAPPDATA%\Remedy\CONTROLResonant, then open
+the account folder and slot-1 (or the appropriate slot folder). Put
+the patcher inside that slot folder, beside the actual .chunk files.
+The patcher does not search account folders or subfolders.
+
 1. Close the game and let cloud synchronization finish.
 2. Find the folder containing matching -header.chunk, -persi-global.chunk,
    -player.chunk and -bundle-container.chunk files.

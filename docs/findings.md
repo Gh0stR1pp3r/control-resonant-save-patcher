@@ -10,6 +10,10 @@ Version 1.4.1 adds this fact to `ExtraUnlockFacts` and its item ID to `Entitleme
 
 Static comparison found the inspected outfit status and entitlement grant/revoke/apply bodies unchanged apart from address relocation, including corresponding internal branches. This does not prove all save readers, dependencies or game data unchanged. The repository owner subsequently tested the Windows v1.4.1 build and explicitly reported that it "works as expected" on October 1, 2026. This is user-reported confirmation on game file version `0.564.208.5`; no independent post-test save inspection or extended persistence test was performed. Linux v1.4.1 compiled successfully but has not been run here. Epic/WGS in-game behavior and cloud persistence remain unconfirmed. The reported map-delay/launch problems are not established as fixed by this reward addition.
 
+## Reported Epic Windows save location (October 1, 2026)
+
+A user located Epic saves at `C:\Users\<Windows-user>\AppData\Local\Remedy\CONTROLResonant\<account-id>\<slot-folder>\`. The account folder is generated and varies between accounts; the reported slot was `slot-1`. The README uses `%LOCALAPPDATA%` to avoid hardcoding a Windows user or drive and tells players to choose the slot containing the actual `.chunk` files. This is a user-reported location, not confirmation of Epic in-game behavior or cloud persistence.
+
 ## What was confirmed
 
 | Finding | Evidence and limits |
