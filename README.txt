@@ -6,7 +6,8 @@ applied-entitlement item ID 0x48A1D491. The repository owner tested the
 Windows build and confirmed it works as expected on October 1, 2026,
 using game file version 0.564.208.5. Linux v1.4.1 compiled successfully;
 its execution, Epic/WGS in-game behavior and cloud persistence remain
-unconfirmed. Reported map delay and launch failures have not been shown fixed.
+unconfirmed. See Known issues below for the reported map/autosave
+stutter workaround. Reported launch failures remain unresolved.
 
 It retains whole-save backups and Steam, Epic and Xbox WGS support.
 The Windows EXE has full product/company metadata and remains unsigned.
@@ -239,6 +240,23 @@ items are already enabled. The owner observed seven returning markers;
 the compared files showed only header changes. Repeated cleanup has no
 demonstrated benefit while those grants remain recognized. There is no need
 to rerun after every session if the desired items are still available.
+
+KNOWN ISSUES
+
+Map-opening and autosave stuttering
+Steam/Windows users reported stuttering when opening the map and during
+autosaves. Users in issue #3 confirmed that moving the backup folder and
+patcher EXE out of the save directory resolved it for them.
+
+After patching finishes, close the patcher. Move CosmeticSaveBackup-...
+folders and CosmeticSavePatcher.exe to another location OUTSIDE the game's
+save directory before starting the game. Keep the backup folders intact
+for recovery. Leave actual save files, preferences and WGS metadata in place.
+
+The original reporter also confirmed that moving the backup saves alone
+fixed their issue. The exact mechanism and results on other platforms
+remain unconfirmed.
+https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/3
 
 Checking without changing anything
 Windows PowerShell:

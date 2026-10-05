@@ -10,6 +10,12 @@ Version 1.4.1 adds this fact to `ExtraUnlockFacts` and its item ID to `Entitleme
 
 Static comparison found the inspected outfit status and entitlement grant/revoke/apply bodies unchanged apart from address relocation, including corresponding internal branches. This does not prove all save readers, dependencies or game data unchanged. The repository owner subsequently tested the Windows v1.4.1 build and explicitly reported that it "works as expected" on October 1, 2026. This is user-reported confirmation on game file version `0.564.208.5`; no independent post-test save inspection or extended persistence test was performed. Linux v1.4.1 compiled successfully but has not been run here. Epic/WGS in-game behavior and cloud persistence remain unconfirmed. The reported map-delay/launch problems are not established as fixed by this reward addition.
 
+## Reported map/autosave workaround (October 5, 2026)
+
+In [issue #3](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/3), [SonOfSaris proposed](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/3#issuecomment-5975246550) moving the backup folder and patcher EXE outside the save directory. [krizz02 confirmed](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/3#issuecomment-5982186761) that this removed map-loading and autosave stuttering. [The original reporter confirmed](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/3#issuecomment-5998778185) that moving the backup saves alone fixed their issue. The issue was subsequently closed.
+
+This supports documenting a user-confirmed workaround. It does not establish the precise game/Steam scanning or synchronization mechanism, a fix in the patcher's code, or the same result on Epic/WGS/Linux. Earlier hypotheses about entitlement reapplication and cosmetic flags remain unproven for this report. Preserve backups in another location; do not delete them as part of the workaround.
+
 ## Reported Epic Windows save location (October 1, 2026)
 
 A user located Epic saves at `C:\Users\<Windows-user>\AppData\Local\Remedy\CONTROLResonant\<account-id>\<slot-folder>\`. The account folder is generated and varies between accounts; the reported slot was `slot-1`. The README uses `%LOCALAPPDATA%` to avoid hardcoding a Windows user or drive and tells players to choose the slot containing the actual `.chunk` files. This is a user-reported location, not confirmation of Epic in-game behavior or cloud persistence.

@@ -212,6 +212,16 @@ Other outfit choices, preferences, other save sets, and the game executable are 
 
 If the game recognizes a grant, it may add its marker again on the next load/save. Running the patcher can then remove that marker again and create another backup even though all supported cosmetics are already enabled. The owner observed seven markers returning in this way; the supplied before/after files showed only a header edit and no cosmetic changes. There is no demonstrated benefit from repeatedly removing those seven markers while those grants remain recognized. You do not need to rerun the patcher after every session if the desired items are still available.
 
+## Known issues
+
+### Map-opening and autosave stuttering
+
+Steam/Windows users reported stuttering when opening the map and during autosaves. Users in [issue #3](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/3) confirmed that moving the backup folder and patcher EXE out of the save directory resolved it for them.
+
+**Workaround:** after patching finishes, close the patcher and move the `CosmeticSaveBackup-...` folder(s) and `CosmeticSavePatcher.exe` to another location **outside the game's save directory** before starting the game. Keep the backup folders intact so you can restore your saves if needed. Leave the actual save files, preferences and WGS metadata in place.
+
+The original reporter also confirmed that moving the backup saves alone fixed their issue. These are user-confirmed workarounds; the exact scanning or synchronization mechanism has not been established, and results on other platforms are unconfirmed.
+
 ## Check without editing
 
 Windows:
