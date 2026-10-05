@@ -218,6 +218,8 @@ If the game recognizes a grant, it may add its marker again on the next load/sav
 
 Steam/Windows users reported stuttering when opening the map and during autosaves. Users in [issue #3](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/3) confirmed that moving the backup folder and patcher EXE out of the save directory resolved it for them.
 
+[SonOfSaris](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/3#issuecomment-5975246550) identified the workaround. [Stonga2](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/3) reported the issue, and [krizz02](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/3#issuecomment-5982186761) confirmed the workaround resolved map and autosave stuttering.
+
 **Workaround:** after patching finishes, close the patcher and move the `CosmeticSaveBackup-...` folder(s) and `CosmeticSavePatcher.exe` to another location **outside the game's save directory** before starting the game. Keep the backup folders intact so you can restore your saves if needed. Leave the actual save files, preferences and WGS metadata in place.
 
 The original reporter also confirmed that moving the backup saves alone fixed their issue. These are user-confirmed workarounds; the exact scanning or synchronization mechanism has not been established, and results on other platforms are unconfirmed.
@@ -281,3 +283,5 @@ Start with [AGENTS.md](AGENTS.md). Technical references cover the [save format a
 ## Credits
 
 Xbox WGS file support was contributed by [hdfyeg35](https://github.com/hdfyeg35), with metadata and path-safety fixes added during integration.
+
+Map/autosave stutter workaround: [SonOfSaris](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/3#issuecomment-5975246550) identified the workaround. [Stonga2](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/3) reported the issue, and [krizz02](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/3#issuecomment-5982186761) confirmed the workaround resolved map and autosave stuttering.

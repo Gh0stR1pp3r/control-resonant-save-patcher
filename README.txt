@@ -248,6 +248,10 @@ Steam/Windows users reported stuttering when opening the map and during
 autosaves. Users in issue #3 confirmed that moving the backup folder and
 patcher EXE out of the save directory resolved it for them.
 
+Workaround identified by SonOfSaris; issue reported by Stonga2 and
+the map/autosave workaround confirmed by krizz02.
+https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/3#issuecomment-5975246550
+
 After patching finishes, close the patcher. Move CosmeticSaveBackup-...
 folders and CosmeticSavePatcher.exe to another location OUTSIDE the game's
 save directory before starting the game. Keep the backup folders intact
@@ -299,3 +303,9 @@ The build downloads official .NET runtime packages; no third-party
 application dependencies are used. Runtime version is pinned to 8.0.31.
 Use source files from the version you want to build. The original
 v1.1.0 automatic source archive predates the Linux project.
+
+CREDITS
+Workaround identified by SonOfSaris; issue reported by Stonga2 and
+the map/autosave workaround confirmed by krizz02.
+https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/3#issuecomment-5975246550
+

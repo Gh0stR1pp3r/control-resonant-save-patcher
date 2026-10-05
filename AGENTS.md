@@ -51,3 +51,5 @@ dotnet publish CosmeticSavePatcher.Linux.csproj -c Release -o publish/linux-x64
 See the release guide before changing versions, runtime packages, release assets, or compatibility claims. Keep these documents current when behavior or evidence changes.
 
 Xbox WGS file support is credited to [hdfyeg35](https://github.com/hdfyeg35); preserve this credit and contributor history. See [WGS integration](docs/wgs-support.md).
+
+Credit [SonOfSaris](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/3#issuecomment-5975246550) for identifying the issue #3 map/autosave workaround; [Stonga2](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/3) reported the issue and krizz02 confirmed the workaround. Preserve these attributions in player-facing credits.
