@@ -2,6 +2,8 @@
 
 ![Control Resonant](https://exputer.com/wp-content/uploads/2026/08/control-resonant.jpg)
 
+**[v1.4.2 prerelease](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/tag/v1.4.2): Windows long-path fix for [issue #8](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/8).** Download the prerelease to try paths longer than 260 characters. Both builds compiled; long-path execution and in-game behavior on this version await user confirmation. The stable downloads below remain v1.4.1.
+
 A Windows and Linux x64 utility for restoring unobtainable outfits/items in supported Control Resonant saves. Version **1.4.1** restores **14 cosmetics plus the Pickpocket's Tool charm** and removes their associated applied-entitlement entries.
 
 **Windows v1.4.1 was tested by the repository owner, who confirmed it works as expected on October 1, 2026, using game file version `0.564.208.5`.** It adds Deathadder Jacket (Razer).
@@ -16,6 +18,14 @@ The downloads below are **v1.4.1**, available for Windows and Linux x64, with St
 
 - **[Windows: CosmeticSavePatcher.exe](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/latest/download/CosmeticSavePatcher.exe)**
 - **[Linux x64: CosmeticSavePatcher-linux-x64](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/latest/download/CosmeticSavePatcher-linux-x64)** — includes .NET; no separate .NET installation or Wine needed. A Linux user reported successful execution in [issue #2](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/2).
+
+## New in 1.4.2 (prerelease)
+
+- Enables modern .NET Framework path handling and uses extended-length Windows paths for save discovery, backups, temporary files, replacement and rollback.
+- Addresses the 260-character path failure reported with deep Xbox WGS backup paths in issue #8. Requires .NET Framework 4.6.2 or later on Windows; no separate configuration file or system-wide long-path setting is required.
+- Retains backup locations, the 15 supported item flags, entitlement handling and existing safety checks. The issue #3 map/autosave workaround still applies.
+- Linux carries version 1.4.2 with the same patching logic; the path-handling change is specific to the Windows .NET Framework build.
+- Build status only: no long-path runtime, rollback or in-game tests were performed for this prerelease.
 
 ## New in 1.4.1
 

@@ -13,13 +13,13 @@ using System.Text;
 [assembly: AssemblyDescription("Restores supported outfits and items in Control Resonant Steam, Epic Games, and Xbox WGS saves, with automatic backups and checksum validation.")]
 [assembly: AssemblyCompany("Gh0stR1pp3r")]
 [assembly: AssemblyCopyright("Copyright (c) 2026 Gh0stR1pp3r and contributors")]
-[assembly: AssemblyVersion("1.4.1.0")]
-[assembly: AssemblyFileVersion("1.4.1.0")]
-[assembly: AssemblyInformationalVersion("1.4.1")]
+[assembly: AssemblyVersion("1.4.2.0")]
+[assembly: AssemblyFileVersion("1.4.2.0")]
+[assembly: AssemblyInformationalVersion("1.4.2")]
 
 internal static class Program
 {
-    const string Version = "1.4.1";
+    const string Version = "1.4.2";
     // Xbox WGS storage support contributed by https://github.com/hdfyeg35.
     static readonly StringComparison PathComparison = System.IO.Path.DirectorySeparatorChar == '\\'
         ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
@@ -95,6 +95,11 @@ internal static class Program
 
     static int Main(string[] args)
     {
+#if !NET8_0_OR_GREATER
+        // Opt in before any System.IO path handling caches legacy defaults.
+        AppContext.SetSwitch("Switch.System.IO.UseLegacyPathHandling", false);
+        AppContext.SetSwitch("Switch.System.IO.BlockLongPaths", false);
+#endif
         bool noPause = args.Contains("--no-pause");
         int status = 0;
         try
@@ -635,6 +640,15 @@ internal static class Program
         string directory = AppDomain.CurrentDomain.BaseDirectory;
 #endif
         Console.WriteLine("Save folder: " + directory);
+#if !NET8_0_OR_GREATER
+        // Normalize first, then use extended paths for every descendant I/O
+        // operation, including backup, staging, replacement and rollback.
+        // The explicit prefix avoids requiring a system-wide long-path setting.
+        directory = System.IO.Path.GetFullPath(directory);
+        if (!directory.StartsWith(@"\\?\", StringComparison.Ordinal))
+            directory = directory.StartsWith(@"\\", StringComparison.Ordinal)
+                ? @"\\?\UNC\" + directory.Substring(2) : @"\\?\" + directory;
+#endif
         bool wgs;
         Dictionary<string, byte[]> metadataSnapshots;
         List<SaveContainer> containers = DiscoverSaveContainers(directory, out wgs, out metadataSnapshots);

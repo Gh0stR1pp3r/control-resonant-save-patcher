@@ -2,6 +2,14 @@
 
 Repository: [Gh0stR1pp3r/control-resonant-save-patcher](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher).
 
+## v1.4.2 prerelease
+
+Published as a prerelease on October 16, 2026 for the Windows 260-character path limitation reported in [issue #8](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/8). The Windows entry point opts out of legacy .NET Framework path handling before I/O and uses an extended-length local/UNC save root for all descendant operations. Requires .NET Framework 4.6.2 or later; it remains a single EXE without a companion configuration file or system-wide long-path setting. Existing filename-component and filesystem limits still apply.
+
+Backup locations, reward flags, entitlement behavior, validation, full-backup checks and rollback logic are retained. Linux only receives the version bump. Both artifacts compiled; long-path execution, rollback, in-game behavior and cloud persistence were not tested for v1.4.2. The map/autosave workaround remains applicable. Do not carry v1.4.1 user confirmation over to this build.
+
+Keep v1.4.1 as the latest stable release. Publish v1.4.2 with `prerelease: true` and `make_latest: false`; use version-specific download links for the prerelease. Do not replace existing v1.4.1 assets or move its tag.
+
 The documented baseline is [v1.4.1](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/tag/v1.4.1). Inspect the current branch, tags, release, and task instructions before publishing. Local scripts used by the original maintainer are not part of this repository and should not be assumed available to a future agent.
 
 ## v1.4.1 release status

@@ -1,9 +1,25 @@
-CONTROL RESONANT SAVE PATCHER 1.4.1
+CONTROL RESONANT SAVE PATCHER 1.4.2 - PRERELEASE
+
+Windows long-path fix for issue #8:
+https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/8
+
+Enables modern .NET Framework path handling and extended-length Windows
+paths for discovery, backups, temporary files, replacement and rollback.
+Requires .NET Framework 4.6.2 or later on Windows. Only the EXE is needed;
+no extra configuration file or system-wide long-path setting is required.
+Backup locations, supported rewards and save safety checks are retained.
+The Linux 1.4.2 build retains its existing path and patching behavior.
+Both builds compiled. Long-path execution, rollback and in-game behavior
+have not been tested for this prerelease. The issue #3 workaround still
+applies: move backups and the patcher out of the save folder after use.
+
+Download: https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/tag/v1.4.2
+The latest stable release remains v1.4.1.
 
 Restores 14 cosmetics and the Pickpocket's Tool charm. Version 1.4.1 adds
 Deathadder Jacket (Razer), flag 0x3EE727291BFE7B2B, and cleanup of its
 applied-entitlement item ID 0x48A1D491. The repository owner tested the
-Windows build and confirmed it works as expected on October 1, 2026,
+Windows v1.4.1 build and confirmed it works as expected on October 1, 2026,
 using game file version 0.564.208.5. Linux v1.4.1 compiled successfully;
 its execution, Epic/WGS in-game behavior and cloud persistence remain
 unconfirmed. See Known issues below for the reported map/autosave
