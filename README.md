@@ -2,9 +2,9 @@
 
 ![Control Resonant](https://exputer.com/wp-content/uploads/2026/08/control-resonant.jpg)
 
-**[v1.4.2 prerelease](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/tag/v1.4.2): Windows long-path fix for [issue #8](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/8).** Download the prerelease to try paths longer than 260 characters. Both builds compiled; long-path execution and in-game behavior on this version await user confirmation. The stable downloads below remain v1.4.1.
+**[v1.4.2](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/tag/v1.4.2) is the latest stable release.** The repository owner confirmed it working on October 27, 2026. It adds the Windows long-path fix for [issue #8](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/8).
 
-A Windows and Linux x64 utility for restoring unobtainable outfits/items in supported Control Resonant saves. Version **1.4.1** restores **14 cosmetics plus the Pickpocket's Tool charm** and removes their associated applied-entitlement entries.
+A Windows and Linux x64 utility for restoring unobtainable outfits/items in supported Control Resonant saves. Version **1.4.2** restores **14 cosmetics plus the Pickpocket's Tool charm** and removes their associated applied-entitlement entries.
 
 **Windows v1.4.1 was tested by the repository owner, who confirmed it works as expected on October 1, 2026, using game file version `0.564.208.5`.** It adds Deathadder Jacket (Razer).
 
@@ -14,18 +14,18 @@ A Windows and Linux x64 utility for restoring unobtainable outfits/items in supp
 
 ## Downloads
 
-The downloads below are **v1.4.1**, available for Windows and Linux x64, with Steam, Epic `.chunk`, and Xbox app / Microsoft Store WGS save support. The Windows download is the exact build tested by the repository owner. Linux v1.4.1 compiled successfully; its execution, Epic/WGS in-game behavior, and cloud persistence remain unconfirmed.
+The downloads below are **v1.4.2**, available for Windows and Linux x64, with Steam, Epic `.chunk`, and Xbox app / Microsoft Store WGS save support. The repository owner confirmed v1.4.2 working; the specific platform and save format were not provided. Both builds compiled, and the existing prerelease executables were promoted without rebuilding. Cloud persistence remains unconfirmed.
 
 - **[Windows: CosmeticSavePatcher.exe](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/latest/download/CosmeticSavePatcher.exe)**
 - **[Linux x64: CosmeticSavePatcher-linux-x64](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/releases/latest/download/CosmeticSavePatcher-linux-x64)** — includes .NET; no separate .NET installation or Wine needed. A Linux user reported successful execution in [issue #2](https://github.com/Gh0stR1pp3r/control-resonant-save-patcher/issues/2).
 
-## New in 1.4.2 (prerelease)
+## New in 1.4.2
 
 - Enables modern .NET Framework path handling and uses extended-length Windows paths for save discovery, backups, temporary files, replacement and rollback.
 - Addresses the 260-character path failure reported with deep Xbox WGS backup paths in issue #8. Requires .NET Framework 4.6.2 or later on Windows; no separate configuration file or system-wide long-path setting is required.
 - Retains backup locations, the 15 supported item flags, entitlement handling and existing safety checks. The issue #3 map/autosave workaround still applies.
 - Linux carries version 1.4.2 with the same patching logic; the path-handling change is specific to the Windows .NET Framework build.
-- Build status only: no long-path runtime, rollback or in-game tests were performed for this prerelease.
+- The repository owner confirmed v1.4.2 working on October 27, 2026. This is a user-reported result; independent long-path, rollback and cloud validation were not performed.
 
 ## New in 1.4.1
 
@@ -95,7 +95,7 @@ Only the EXE is needed. No Python, installer, internet connection, or administra
 
 ### Windows: Xbox app / Microsoft Store WGS
 
-Use the v1.4.1 Windows download above. Close the game and let any ongoing synchronization finish. Keep a full copy of the WGS account folder before first use.
+Use the v1.4.2 Windows download above. Close the game and let any ongoing synchronization finish. Keep a full copy of the WGS account folder before first use.
 
 1. Open `%LOCALAPPDATA%\Packages\` and find the game's package folder beginning with `Remedy.CONTROLResonant_`.
 2. Open its `SystemAppData\wgs\` directory, then the account folder containing `containers.index`.
@@ -125,7 +125,7 @@ Press **Win+R**, enter `%LOCALAPPDATA%\Remedy\CONTROLResonant`, and open your ac
 
 1. Close the game and let any ongoing cloud synchronization finish.
 2. Open the account and slot folder described above. Confirm that it contains matching `-header.chunk`, `-persi-global.chunk`, `-player.chunk`, and `-bundle-container.chunk` files.
-3. Put the v1.4.1 patcher for your operating system beside those files. Keep the `.chunk` extensions and the existing `--containerDisplayName.chunk` file.
+3. Put the v1.4.2 patcher for your operating system beside those files. Keep the `.chunk` extensions and the existing `--containerDisplayName.chunk` file.
 4. On Windows, double-click `CosmeticSavePatcher.exe`. On Linux, use the terminal commands in the Linux section below.
 5. Read the result, then load the save in game. The newest set is chosen using the timestamp inside its header; all four matching files must be present.
 
@@ -218,7 +218,7 @@ Other outfit choices, preferences, other save sets, and the game executable are 
 
 ## Why entitlement entries can return
 
-`Entitlement entries to remove` counts applied-grant markers, not new items to unlock. Removing a marker is intended to avoid the analyzed revocation path when the game does not recognize its entitlement. Version 1.4.1 removes matching markers without checking live account ownership.
+`Entitlement entries to remove` counts applied-grant markers, not new items to unlock. Removing a marker is intended to avoid the analyzed revocation path when the game does not recognize its entitlement. Version 1.4.2 removes matching markers without checking live account ownership.
 
 If the game recognizes a grant, it may add its marker again on the next load/save. Running the patcher can then remove that marker again and create another backup even though all supported cosmetics are already enabled. The owner observed seven markers returning in this way; the supplied before/after files showed only a header edit and no cosmetic changes. There is no demonstrated benefit from repeatedly removing those seven markers while those grants remain recognized. You do not need to rerun the patcher after every session if the desired items are still available.
 
